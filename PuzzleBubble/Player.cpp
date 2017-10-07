@@ -2,11 +2,12 @@
 #include <iostream>
 #include "dependencies\glew-1.13.0\include\GL\glew.h"
 #include "dependencies\freeglut\include\GL\glut.h"
+#include "dependencies\glm\glm\gtc\matrix_transform.hpp"
 #include "Player.h"
 #include "Game.h"
 
 #define MAX_ARROW_ROT 1.2f
-#define PLAYER_CENTER_CORRECTION_X 1
+#define PLAYER_CENTER_CORRECTION_X 1 //Correction for arrow rotation purposes
 #define PLAYER_CENTER_CORRECTION_Y 4
 
 void Player::init(const glm::ivec2 &tileMapPos, ShaderProgram &shaderProgram, glm::vec2 position)
@@ -23,10 +24,12 @@ void Player::update(int deltaTime)
 	if(Game::instance().getSpecialKey(GLUT_KEY_RIGHT))
 	{
 		if (arrowAngle < MAX_ARROW_ROT) arrowAngle += 0.05f;
+		arrowDirection = glm::normalize(glm::rotate(glm::mat4(1.0f), arrowAngle, glm::vec3(0.f, 0.f, 1.f)) * arrowDirection);
 	}
 	else if(Game::instance().getSpecialKey(GLUT_KEY_LEFT))
 	{
 		if (arrowAngle > -MAX_ARROW_ROT) arrowAngle -= 0.05f;
+		arrowDirection = glm::normalize(glm::rotate(glm::mat4(1.0f), arrowAngle, glm::vec3(0.f, 0.f, 1.f)) * arrowDirection);
 	}
 	sprite->rotate(arrowAngle);
 	sprite->setPosition(position);

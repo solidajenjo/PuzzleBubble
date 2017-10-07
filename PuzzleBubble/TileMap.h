@@ -3,6 +3,7 @@
 
 
 #include "dependencies\glm\glm\glm.hpp"
+#include <vector>
 #include "Texture.h"
 #include "ShaderProgram.h"
 
@@ -25,17 +26,14 @@ public:
 
 	void render() const;
 	void free();
-	
+	vector<vector<int> > getLogicMatrix();
 	int getTileSize() const { return tileSize; }
-
-	bool collisionMoveLeft(const glm::ivec2 &pos, const glm::ivec2 &size) const;
-	bool collisionMoveRight(const glm::ivec2 &pos, const glm::ivec2 &size) const;
-	bool collisionMoveDown(const glm::ivec2 &pos, const glm::ivec2 &size, int *posY) const;
 	
 private:
 	bool loadLevel(const string &levelFile);
 	void prepareArrays(const glm::vec2 &minCoords, ShaderProgram &program);
-
+	vector<vector<int> > logicMatrix;
+	void incLineOffset();
 private:
 	GLuint vao;
 	GLuint vbo;
@@ -45,7 +43,7 @@ private:
 	Texture tilesheet;
 	glm::vec2 tileTexSize;
 	int *map;
-
+	int lineOffset = 0;
 };
 
 

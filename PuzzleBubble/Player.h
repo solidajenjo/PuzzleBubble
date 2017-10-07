@@ -28,6 +28,7 @@ private:
 	TileMap *map;
 	float arrowAngle = 0.;
 	glm::vec2 position;
+	glm::vec4 arrowDirection = glm::vec4(0.f, 1.f, 0.f, 1.f);
 };
 
 

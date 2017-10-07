@@ -32,7 +32,8 @@ private:
 	ShaderProgram texProgram;
 	float currentTime;
 	glm::mat4 projection;
-
+	Sprite *skin;
+	Texture skinTex;
 };
 
 

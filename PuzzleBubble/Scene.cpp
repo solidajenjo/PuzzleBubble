@@ -8,6 +8,8 @@
 #define SCREEN_X 32
 #define SCREEN_Y 16
 
+#define SCREEN_PIX_X 640
+#define SCREEN_PIX_Y 480
 #define PLAYER_POS_X 320
 #define PLAYER_POS_Y 440
 #define INIT_PLAYER_X_TILES 4
@@ -32,6 +34,8 @@ Scene::~Scene()
 void Scene::init()
 {
 	initShaders();
+	skinTex.loadFromFile("images/skin.png", TEXTURE_PIXEL_FORMAT_RGBA);
+	skin = Sprite::createSprite(glm::ivec2(640.f, 480.f), glm::vec2(0.f, 0.f), glm::vec2(1, 1), &skinTex, &texProgram);
 	map = TileMap::createTileMap("levels/level01.txt", glm::vec2(SCREEN_X, SCREEN_Y), texProgram);
 	player = new Player();
 	player->init(glm::ivec2(SCREEN_X, SCREEN_Y), texProgram, glm::vec2(PLAYER_POS_X, PLAYER_POS_Y));
@@ -57,6 +61,8 @@ void Scene::render()
 	texProgram.setUniform2f("texCoordDispl", 0.f, 0.f);
 	map->render();
 	player->render();
+	skin->setPosition(glm::vec2(SCREEN_PIX_X / 2.f, SCREEN_PIX_Y / 2.f));
+	skin->render();
 }
 
 void Scene::initShaders()
