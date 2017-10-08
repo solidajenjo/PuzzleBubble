@@ -13,6 +13,7 @@
 static int prevTime;
 static Game game; // This object represents our whole game
 
+int deltaTime;
 
 // If a key is pressed this callback is called
 
@@ -61,14 +62,14 @@ static void mouseCallback(int button, int state, int x, int y)
 
 static void drawCallback()
 {
-	Game::instance().render();
+	Game::instance().render(deltaTime);
 	glutSwapBuffers();
 }
 
 static void idleCallback()
 {
 	int currentTime = glutGet(GLUT_ELAPSED_TIME);
-	int deltaTime = currentTime - prevTime;
+	deltaTime = currentTime - prevTime;
 	
 	if(deltaTime > TIME_PER_FRAME)
 	{

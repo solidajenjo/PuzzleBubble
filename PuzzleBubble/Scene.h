@@ -6,6 +6,8 @@
 #include "ShaderProgram.h"
 #include "TileMap.h"
 #include "Player.h"
+#include "Quad.h"
+#include "Ball.h"
 
 
 // Scene contains all the entities of our game.
@@ -21,7 +23,7 @@ public:
 
 	void init();
 	void update(int deltaTime);
-	void render();
+	void render(int deltaTime);
 
 private:
 	void initShaders();
@@ -33,7 +35,9 @@ private:
 	float currentTime;
 	glm::mat4 projection;
 	Sprite *skin;
-	Texture skinTex;
+	Texture skinTex, ballsTex;	
+	vector<glm::vec2> ballsCoords; //balls tex coords
+	Ball *currentBall, *nextBall, *movingBall = NULL;
 };
 
 

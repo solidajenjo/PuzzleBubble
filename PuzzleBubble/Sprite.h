@@ -9,7 +9,7 @@
 #include "AnimKeyframes.h"
 
 
-// This class is derived from code seen earlier in TexturedQuad but it is also
+// This class is derived from code seen earlier in Ball but it is also
 // able to manage animations stored as a spritesheet. 
 
 
