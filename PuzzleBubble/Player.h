@@ -7,10 +7,6 @@
 #include "Ball.h"
 
 
-// Player is basically a Sprite that represents the player. As such it has
-// all properties it needs to track its movement, jumping, and collisions.
-
-
 class Player
 {
 
@@ -21,11 +17,13 @@ public:
 	bool isBallShot();
 	void ballShotAcquired();
 	void setWaitingTime(int time);
+	void setBlocked(bool status);
 	void render();
 	
 	
 private:
 	bool ballShot = false;
+	bool blocked = false;
 	glm::ivec2 tileMapDispl, posPlayer;
 	int jumpAngle, startY, waitingToShoot = 0;
 	Texture spritesheet;

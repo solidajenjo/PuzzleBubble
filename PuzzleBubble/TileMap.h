@@ -4,6 +4,7 @@
 
 #include "dependencies\glm\glm\glm.hpp"
 #include <vector>
+#include <queue>
 #include "Texture.h"
 #include "ShaderProgram.h"
 
@@ -28,12 +29,21 @@ public:
 	void free();
 	vector<vector<int> > getLogicMatrix();
 	int getTileSize() const { return tileSize; }
-	
+	int screenToTileCellContent(glm::vec2 screenPos, int xDir);
+	void insertBall(glm::vec2 position, int xDir, int color);
+	bool update(int deltaTime);
+	bool checkDeath();
+	queue<int> getMustExplode();
+	queue<int> checkHanging();
+	void resetMustExplode();
 private:
 	bool loadLevel(const string &levelFile);
 	void prepareArrays(const glm::vec2 &minCoords, ShaderProgram &program);
 	vector<vector<int> > logicMatrix;
+	vector<vector<int> > logicToMapMatrix;
+	vector<int>	mapToLogicMatrix;
 	void incLineOffset();
+	void checkExplosions(glm::vec2 newBallPos, int color);	
 private:
 	GLuint vao;
 	GLuint vbo;
@@ -44,6 +54,11 @@ private:
 	glm::vec2 tileTexSize;
 	int *map;
 	int lineOffset = 0;
+	float pixelOffset = 0.f;
+	glm::vec2 minCoordsRedraw;
+	ShaderProgram programRedraw;
+	queue<int> mustExplode;
+	bool fillLogToMap = true;
 };
 
 

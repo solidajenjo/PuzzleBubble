@@ -8,6 +8,7 @@
 #include "Player.h"
 #include "Quad.h"
 #include "Ball.h"
+#include "Text.h"
 
 
 // Scene contains all the entities of our game.
@@ -31,13 +32,16 @@ private:
 private:
 	TileMap *map;
 	Player *player;
-	ShaderProgram texProgram;
+	ShaderProgram texProgram, textProgram;
 	float currentTime;
+	int updateScreenTimer;
 	glm::mat4 projection;
-	Sprite *skin;
-	Texture skinTex, ballsTex;	
+	Sprite *skin, *background;
+	Texture skinTex, ballsTex, bgTex;	
 	vector<glm::vec2> ballsCoords; //balls tex coords
 	Ball *currentBall, *nextBall, *movingBall = NULL;
+	int status, score, frameCounter;
+	Text text;
 };
 
 

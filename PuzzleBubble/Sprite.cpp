@@ -4,10 +4,9 @@
 #include "Sprite.h"
 
 
-Sprite *Sprite::createSprite(const glm::vec2 &quadSize, glm::vec2 centerCorrection, const glm::vec2 &sizeInSpritesheet, Texture *spritesheet, ShaderProgram *program)
+Sprite *Sprite::createSprite(const glm::vec2 &quadSize, const glm::vec2 &sizeInSpritesheet, Texture *spritesheet, ShaderProgram *program)
 {
-	Sprite *quad = new Sprite(quadSize, sizeInSpritesheet, spritesheet, program);
-	quad->setSpriteCenter(glm::vec2(quadSize.x / 2.f, quadSize.y / 2.f), centerCorrection);
+	Sprite *quad = new Sprite(quadSize, sizeInSpritesheet, spritesheet, program);	
 	return quad;
 }
 
@@ -30,7 +29,7 @@ Sprite::Sprite(const glm::vec2 &quadSize, const glm::vec2 &sizeInSpritesheet, Te
 	texCoordLocation = program->bindVertexAttribute("texCoord", 2, 4*sizeof(float), (void *)(2*sizeof(float)));
 	texture = spritesheet;
 	shaderProgram = program;
-	currentAnimation = -1;
+	rotationAngle = 0.f;
 	position = glm::vec2(0.f);
 }
 
@@ -52,7 +51,7 @@ void Sprite::render() const
 {
 	glm::mat4 modelview = glm::translate(glm::mat4(1.0f), glm::vec3(position.x, position.y, 0.f));
 	modelview = glm::rotate(modelview, rotationAngle, glm::vec3(0.f, 0.f, 1.f));
-	modelview = glm::translate(modelview, glm::vec3(-spriteCenter.x - centerCorrection.x, -spriteCenter.y - centerCorrection.y, 0.f));
+	modelview = glm::translate(modelview, glm::vec3(-spriteCenter.x, -spriteCenter.y, 0.f));
 	shaderProgram->setUniformMatrix4f("modelview", modelview);
 	shaderProgram->setUniform2f("texCoordDispl", texCoordDispl.x, texCoordDispl.y);
 	glEnable(GL_TEXTURE_2D);
@@ -108,10 +107,9 @@ int Sprite::animation() const
 	return currentAnimation;
 }
 
-void Sprite::setSpriteCenter(glm::vec2 spriteCenter, glm::vec2 centerCorrection)
+void Sprite::setSpriteCenter(glm::vec2 spriteCenter)
 {
 	this->spriteCenter = spriteCenter;
-	this->centerCorrection = centerCorrection;
 }
 
 void Sprite::setPosition(const glm::vec2 &pos)

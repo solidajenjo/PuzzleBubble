@@ -18,7 +18,7 @@ class Sprite
 
 public:
 	// Textured quads can only be created inside an OpenGL context
-	static Sprite *createSprite(const glm::vec2 &quadSize, glm::vec2 centerCorrection, const glm::vec2 &sizeInSpritesheet, Texture *spritesheet, ShaderProgram *program);
+	static Sprite *createSprite(const glm::vec2 &quadSize, const glm::vec2 &sizeInSpritesheet, Texture *spritesheet, ShaderProgram *program);
 
 	Sprite(const glm::vec2 &quadSize, const glm::vec2 &sizeInSpritesheet, Texture *spritesheet, ShaderProgram *program);
 
@@ -32,7 +32,7 @@ public:
 	void addKeyframe(int animId, const glm::vec2 &frame);
 	void changeAnimation(int animId);
 	int animation() const;
-	void setSpriteCenter(glm::vec2 spriteCenter, glm::vec2 centerCorrection);
+	void setSpriteCenter(glm::vec2 spriteCenter);
 	void setPosition(const glm::vec2 &pos);
 
 private:
@@ -48,7 +48,6 @@ private:
 	float rotationAngle;
 	vector<AnimKeyframes> animations;
 	glm::vec2 spriteCenter;
-	glm::vec2 centerCorrection;
 };
 
 
