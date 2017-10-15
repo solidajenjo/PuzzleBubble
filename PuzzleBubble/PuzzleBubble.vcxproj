@@ -156,6 +156,12 @@
     <Text Include="levels\level01.txt" />
     <Text Include="levels\levelBlank.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Debug\freeglut.dll" />
+    <None Include="..\Debug\freetype6.dll" />
+    <None Include="..\Debug\glew32.dll" />
+    <None Include="..\Debug\zlib1.dll" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -100,4 +100,10 @@
     <Text Include="levels\level01.txt" />
     <Text Include="levels\levelBlank.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Debug\freeglut.dll" />
+    <None Include="..\Debug\freetype6.dll" />
+    <None Include="..\Debug\glew32.dll" />
+    <None Include="..\Debug\zlib1.dll" />
+  </ItemGroup>
 </Project>
