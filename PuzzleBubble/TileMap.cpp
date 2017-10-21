@@ -111,7 +111,7 @@ void TileMap::prepareArrays(const glm::vec2 &minCoords, ShaderProgram &program)
 	int tile, nTiles = 0;
 	glm::vec2 posTile, texCoordTile[2], halfTexel;
 	vector<float> vertices;
-	
+	ballsNumber = 0;
 	halfTexel = glm::vec2(0.5f / tilesheet.width(), 0.5f / tilesheet.height());
 	for(int j=0; j<mapSize.y; j++)
 	{
@@ -123,15 +123,13 @@ void TileMap::prepareArrays(const glm::vec2 &minCoords, ShaderProgram &program)
 			if (j % 2 == 1 - (lineOffset % 2)) xLog = i * 2;
 			else xLog = i * 2 + 1;
 			logicMatrix[j][xLog] = tile; // check color combination matrix
-			if (fillLogToMap) {
-				logicToMapMatrix[j][xLog] = mapPos;
-				mapToLogicMatrix[mapPos * 2] = xLog;
-				mapToLogicMatrix[mapPos * 2 + 1] = j;
-			}
-			if(tile != 0)
+			logicToMapMatrix[j][xLog] = mapPos;
+			mapToLogicMatrix[mapPos * 2] = xLog;
+			mapToLogicMatrix[mapPos * 2 + 1] = j;
+			if(tile != 0 && tile != 9)
 			{
 				// Non-empty tile
-				
+				ballsNumber++;
 				nTiles++;
 				float offsetH = OFFSET_H;
 				float offsetV = OFFSET_V;
@@ -159,18 +157,25 @@ void TileMap::prepareArrays(const glm::vec2 &minCoords, ShaderProgram &program)
 		}
 	}
 	fillLogToMap = false;
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-	glGenBuffers(1, &vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, 24 * nTiles * sizeof(float), &vertices[0], GL_STATIC_DRAW);
-	posLocation = program.bindVertexAttribute("position", 2, 4*sizeof(float), 0);
-	texCoordLocation = program.bindVertexAttribute("texCoord", 2, 4*sizeof(float), (void *)(2*sizeof(float)));
+	if (nTiles > 0) {
+		glGenVertexArrays(1, &vao);
+		glBindVertexArray(vao);
+		glGenBuffers(1, &vbo);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBufferData(GL_ARRAY_BUFFER, 24 * nTiles * sizeof(float), &vertices[0], GL_STATIC_DRAW);
+		posLocation = program.bindVertexAttribute("position", 2, 4 * sizeof(float), 0);
+		texCoordLocation = program.bindVertexAttribute("texCoord", 2, 4 * sizeof(float), (void *)(2 * sizeof(float)));
+	}
 }
 
 void TileMap::incLineOffset()
 {
 	lineOffset++;
+}
+
+int TileMap::getBallsNumber()
+{
+	return ballsNumber;
 }
 
 int logicXtoScreen(int x) {
@@ -212,13 +217,13 @@ void TileMap::checkExplosions(glm::vec2 newBallPos, int color)
 			eraseInMap.push(x + 1); eraseInMap.push(y - 1);
 			mustExplode.push(x + 1); mustExplode.push(y - 1); mustExplode.push(color);
 		}
-		if (y > 0 && x > 0 && !visited[y + 1][x - 1] && logicMatrix[y + 1][x - 1] == color) {
+		if ((y + 1) < logicMatrix.size() && x > 0 && !visited[y + 1][x - 1] && logicMatrix[y + 1][x - 1] == color) {
 			visited[y + 1][x - 1] = true;
 			Q.push(x - 1); Q.push(y + 1);
 			eraseInMap.push(x - 1); eraseInMap.push(y + 1);
 			mustExplode.push(x - 1); mustExplode.push(y + 1); mustExplode.push(color);
 		}
-		if ((x + 1) < logicMatrix[0].size() - 1 && !visited[y + 1][x + 1] && logicMatrix[y + 1][x + 1] == color) {
+		if ((y + 1) < logicMatrix.size() && (x + 1) < logicMatrix[0].size() - 1 && !visited[y + 1][x + 1] && logicMatrix[y + 1][x + 1] == color) {
 			visited[y + 1][x + 1] = true;
 			Q.push(x + 1); Q.push(y + 1);
 			eraseInMap.push(x + 1); eraseInMap.push(y + 1);
@@ -241,12 +246,12 @@ void TileMap::checkExplosions(glm::vec2 newBallPos, int color)
 	if (mustExplode.size() >= 9) {
 		while (eraseInMap.size() > 0) {
 			int x = eraseInMap.front(); eraseInMap.pop();
-			int y = eraseInMap.front(); eraseInMap.pop();						
+			int y = eraseInMap.front(); eraseInMap.pop();
 			map[logicToMapMatrix[y][x]] = 0;
 		}
+		this->prepareArrays(minCoordsRedraw, programRedraw);
 	}
-	else mustExplode = queue<int>();
-	this->prepareArrays(minCoordsRedraw, programRedraw);
+	else mustExplode = queue<int>();	
 	//check "flying" balls
 	//if not exists a path to the top of the board the ball is "flying"
 	for (int i = 1; i < logicMatrix.size(); ++i) {
@@ -272,11 +277,11 @@ void TileMap::checkExplosions(glm::vec2 newBallPos, int color)
 						visited[y - 1][x + 1] = true;
 						Q.push(x + 1); Q.push(y - 1);
 					}
-					if (y > 0 && x > 0 && !visited[y + 1][x - 1] && logicMatrix[y + 1][x - 1] != 0) {
+					if ((y + 1) < logicMatrix.size() && x > 0 && !visited[y + 1][x - 1] && logicMatrix[y + 1][x - 1] != 0) {
 						visited[y + 1][x - 1] = true;
 						Q.push(x - 1); Q.push(y + 1);
 					}
-					if ((x + 1) < logicMatrix[0].size() - 1 && !visited[y + 1][x + 1] && logicMatrix[y + 1][x + 1] != 0) {
+					if ((y + 1) < logicMatrix.size() && (x + 1) < logicMatrix[0].size() - 1 && !visited[y + 1][x + 1] && logicMatrix[y + 1][x + 1] != 0) {
 						visited[y + 1][x + 1] = true;
 						Q.push(x + 1); Q.push(y + 1);
 					}
@@ -291,11 +296,12 @@ void TileMap::checkExplosions(glm::vec2 newBallPos, int color)
 				}
 				if (!hanging) {
 					mustExplode.push(j); mustExplode.push(i); mustExplode.push(logicMatrix[i][j]);
+					eraseInMap.push(j); eraseInMap.push(i);
 					logicMatrix[i][j] = 0;
 					map[logicToMapMatrix[i][j]] = 0;
 				}
 			}
-		}
+		}		
 	}	
 }
 
@@ -332,15 +338,12 @@ void TileMap::insertBall(glm::vec2 position, int xDir, int color)
 {
 	float offsetH = OFFSET_H;
 	float offsetV = OFFSET_V;
-	int yPos = (position.y - offsetV) / tileSize;
+	int yPos = (position.y - offsetV - minCoordsRedraw.y) / tileSize;
 	if (yPos % 2 == 1 - (lineOffset % 2)) offsetH -= 13.f;
-	int xPos = (position.x - offsetH) / tileSize;
-	int mapPos;
-	if (map[yPos * mapSize.x + xPos - 1] == 0)	mapPos = yPos * mapSize.x + xPos - 1;
-	else {
-		if (map[yPos * mapSize.x + xPos - 2] == 0)	mapPos = yPos * mapSize.x + xPos - 2;
-	}
-	map[mapPos] = color + 1;
+	int xPos = (position.x - offsetH - minCoordsRedraw.x) / tileSize;
+	int mapPos = yPos * mapSize.x + xPos;
+	
+   	map[mapPos] = color + 1;
 	glm::vec2 logicPos;
 	checkExplosions(glm::vec2(mapToLogicMatrix[mapPos * 2], mapToLogicMatrix[mapPos * 2 + 1]), color + 1);
 	this->prepareArrays(minCoordsRedraw, programRedraw);	

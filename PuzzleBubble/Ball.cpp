@@ -3,8 +3,8 @@
 #include "Ball.h"
 
 #define SPEED 0.8f
-#define LEFT_MARGIN 204
-#define RIGHT_MARGIN 432
+#define LEFT_MARGIN 208
+#define RIGHT_MARGIN 426
 #define CENTER_CORRECTION_X 13.0f
 #define CENTER_CORRECTION_Y 19.0f
 
@@ -68,17 +68,20 @@ void Ball::update(int deltaTime, TileMap *tileMap)
 			 O
 
 	*/
-	nextFramePosition[1].x = position.x + direction.x * 20.f;
-	nextFramePosition[1].y = position.y + direction.y * 20.f;
+	nextFramePosition[1].x = position.x + direction.x * 28.f;
+	nextFramePosition[1].y = position.y + direction.y * 28.f;
 
-	glm::vec2 sideVector = glm::vec2(position.x + direction.x * 10.f, position.y + direction.y * 10.f); //side vectors slightly shorter
+	if (position.x > RIGHT_MARGIN) nextFramePosition[1].x = position.x - direction.x * 28;
+	if (position.x < LEFT_MARGIN) nextFramePosition[1].x = position.x - direction.x * 28;
+
+	glm::vec2 sideVector = glm::vec2(position.x + direction.x * 20.f, position.y + direction.y * 20.f); //side vectors slightly shorter
 	glm::mat4 rotMat = glm::translate(glm::mat4(1.0f), glm::vec3(sideVector, 0.f));
-	rotMat = glm::rotate(rotMat, 0.7f, glm::vec3(0.f, 0.f, 1.f));
+	rotMat = glm::rotate(rotMat, 0.5f, glm::vec3(0.f, 0.f, 1.f));
 	rotMat = glm::translate(rotMat, glm::vec3(-position.x, -position.y, 0.f));
 	nextFramePosition[2] = glm::vec2(rotMat * glm::vec4(sideVector, 0.f, 1.f));
 
 	rotMat = glm::translate(glm::mat4(1.0f), glm::vec3(sideVector, 0.f));
-	rotMat = glm::rotate(rotMat, -0.7f, glm::vec3(0.f, 0.f, 1.f));
+	rotMat = glm::rotate(rotMat, -0.5f, glm::vec3(0.f, 0.f, 1.f));
 	rotMat = glm::translate(rotMat, glm::vec3(-position.x, -position.y, 0.f));
 	nextFramePosition[0] = glm::vec2(rotMat * glm::vec4(sideVector, 0.f, 1.f));
 
@@ -91,6 +94,7 @@ void Ball::update(int deltaTime, TileMap *tileMap)
 		tileMap->screenToTileCellContent(nextFramePosition[2], xDir);
 	if (nextCellContent != 0) {
 		tileMap->insertBall(glm::vec2(position.x, position.y - CENTER_CORRECTION_Y * 0.8f), -xDir, color);
+		moving = false;
 		deleteBall = true;
 	}
 }

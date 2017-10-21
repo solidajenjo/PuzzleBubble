@@ -34,7 +34,7 @@ public:
 	bool update(int deltaTime);
 	bool checkDeath();
 	queue<int> getMustExplode();
-	queue<int> checkHanging();
+	int getBallsNumber();
 	void resetMustExplode();
 private:
 	bool loadLevel(const string &levelFile);
@@ -54,6 +54,7 @@ private:
 	glm::vec2 tileTexSize;
 	int *map;
 	int lineOffset = 0;
+	int ballsNumber = 0;
 	float pixelOffset = 0.f;
 	glm::vec2 minCoordsRedraw;
 	ShaderProgram programRedraw;

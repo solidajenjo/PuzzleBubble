@@ -22,11 +22,12 @@
 #define NEXT_BALL_X 234
 #define NEXT_BALL_Y 450
 //timer definitons
-#define UPDATE_TIME 20000 //20000
+#define UPDATE_TIME 30000 //20000
 //states definitions
 #define PLAYING 1
 #define UPDATING_BOARD 2
 #define DEAD 3
+#define STAGE_CLEAR 4
 
 
 Scene::Scene()
@@ -132,21 +133,23 @@ void Scene::update(int deltaTime)
 	currentTime += deltaTime;
 	updateScreenTimer -= deltaTime;
 	player->update(deltaTime, currentBall);	
-	if (updateScreenTimer < 0 && movingBall != NULL && !movingBall->isMoving()) {
+	if (updateScreenTimer < 0 && status == PLAYING) {
 		//insert sound moving board
 		status = UPDATING_BOARD;
 	}
 	switch (status) {
 	case UPDATING_BOARD:
-		skin->setPosition(glm::vec2(16.f + 2 - (rand()%4), 8.f));
-		if (map->update(deltaTime)) {
+		skin->setPosition(glm::vec2(16.f + 2 - (rand()%4), 8.f));		
+		if (map->update(deltaTime)) {			
 			status = PLAYING;			
 			updateScreenTimer = UPDATE_TIME;
 		}
 		break;
-	case PLAYING:
+	case PLAYING || STAGE_CLEAR:
+		if (map->checkDeath()) {
+			status = DEAD;
+		}		
 		if (movingBall != NULL) {
-
 			textProgram.use();
 			textProgram.use();
 			textProgram.setUniformMatrix4f("projection", projection);
@@ -178,6 +181,9 @@ void Scene::update(int deltaTime)
 			nextBall->setColor(color);
 			nextBall->setPosition(glm::vec2(NEXT_BALL_X, NEXT_BALL_Y));
 		}
+		if (map->getBallsNumber() == 0) {
+			status = STAGE_CLEAR;
+		}
 		break;
 	}
 }
@@ -188,13 +194,17 @@ void Scene::render(int deltaTime)
 	background->render();
 	frameCounter++;	
 	glm::mat4 modelview;	
-	if (status != DEAD) {
+	if (status == PLAYING) {
 		texProgram.setUniformMatrix4f("projection", projection);
 		texProgram.setUniform4f("color", 1.0f, 1.0f, 1.0f, 1.0f);
 	}
-	else {		
+	else if(status == DEAD) {
 		texProgram.setUniformMatrix4f("projection", projection);
 		texProgram.setUniform4f("color", 0.2f, 0.2f, 0.2f, 1.0f);
+	}
+	else if (status == STAGE_CLEAR) {
+		texProgram.setUniformMatrix4f("projection", projection);
+		texProgram.setUniform4f("color", 0.6f, 0.6f, 0.6f, 1.0f);
 	}
 	modelview = glm::mat4(1.0f);
 	texProgram.setUniformMatrix4f("modelview", modelview);
@@ -209,15 +219,16 @@ void Scene::render(int deltaTime)
 		movingBall->render(glm::vec2(BALL_SCALE_X, BALL_SCALE_Y), ballsTex);
 		textProgram.use();
 		textProgram.setUniformMatrix4f("projection", projection);
-		textProgram.setUniform4f("color", 1.0f, 1.0f, 1.0f, 1.0f);
-		text.render('o', movingBall->getNextFramePos()[0], 16, glm::vec4(0, 0, 0, 1));
-		text.render('o', movingBall->getNextFramePos()[1], 16, glm::vec4(0, 0, 0, 1));
-		text.render('o', movingBall->getNextFramePos()[2], 16, glm::vec4(0, 0, 0, 1));		
+		textProgram.setUniform4f("color", 1.0f, 1.0f, 1.0f, 1.0f);	
 	}
 	text.render("SCORE = " + to_string(score), glm::vec2(240, 24), 16, glm::vec4(0.02f, 0.96f, 0.15f, 1.f));
 	if (status == DEAD && (frameCounter % 100) < 80) {
 		text.render("GAME OVER", glm::vec2(50, 224), 80, glm::vec4(0.02f, 0.96f, 0.15f, 1.f));
 	}	
+	if (status == STAGE_CLEAR && (frameCounter % 100) < 80) {
+		text.render("STAGE CLEARED", glm::vec2(60, 224), 50, glm::vec4(0.02f, 0.96f, 0.15f, 1.f));
+		text.render("Press any key to continue.", glm::vec2(130, 324), 20, glm::vec4(0.02f, 0.96f, 0.15f, 1.f));
+	}
 }
 
 void Scene::initShaders()
