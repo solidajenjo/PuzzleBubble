@@ -28,8 +28,10 @@
 #define UPDATING_BOARD 2
 #define DEAD 3
 #define STAGE_CLEAR 4
-
-
+#define MENU 5
+#define NUMBER_OF_LEVELS 3
+char* levels[] = {"levels/level01.txt", "levels/level02.txt", "levels/level03.txt"};
+int level = 0;
 Scene::Scene()
 {
 	map = NULL;
@@ -105,7 +107,7 @@ void Scene::init()
 	background = Sprite::createSprite(glm::ivec2(800.f, 800.f), glm::vec2(40.0f, 40.0f), &bgTex, &texProgram);
 	background->setSpriteCenter(glm::vec2(200.f, 313.f));
 
-	map = TileMap::createTileMap("levels/level01.txt", glm::vec2(SCREEN_X, SCREEN_Y), texProgram);
+	map = TileMap::createTileMap(levels[level++], glm::vec2(SCREEN_X, SCREEN_Y), texProgram);
 	player = new Player();
 	player->init(glm::ivec2(SCREEN_X, SCREEN_Y), texProgram, glm::vec2(PLAYER_POS_X, PLAYER_POS_Y));
 	projection = glm::ortho(0.f, float(SCREEN_WIDTH - 1), float(SCREEN_HEIGHT - 1), 0.f);
@@ -138,6 +140,17 @@ void Scene::update(int deltaTime)
 		status = UPDATING_BOARD;
 	}
 	switch (status) {
+	case STAGE_CLEAR:		
+		map->render();
+		if (updateScreenTimer < 0) {
+			updateScreenTimer = 0;
+			if (player->anyKeyPressed() && level < NUMBER_OF_LEVELS) {
+				map = TileMap::createTileMap(levels[level++], glm::vec2(SCREEN_X, SCREEN_Y), texProgram);
+				status = PLAYING;
+				updateScreenTimer = UPDATE_TIME;
+			}
+		}
+		break;
 	case UPDATING_BOARD:
 		skin->setPosition(glm::vec2(16.f + 2 - (rand()%4), 8.f));		
 		if (map->update(deltaTime)) {			
@@ -145,7 +158,7 @@ void Scene::update(int deltaTime)
 			updateScreenTimer = UPDATE_TIME;
 		}
 		break;
-	case PLAYING || STAGE_CLEAR:
+	case PLAYING:
 		if (map->checkDeath()) {
 			status = DEAD;
 		}		
@@ -183,6 +196,7 @@ void Scene::update(int deltaTime)
 		}
 		if (map->getBallsNumber() == 0) {
 			status = STAGE_CLEAR;
+			updateScreenTimer = UPDATE_TIME / 20;
 		}
 		break;
 	}
@@ -224,6 +238,7 @@ void Scene::render(int deltaTime)
 	text.render("SCORE = " + to_string(score), glm::vec2(240, 24), 16, glm::vec4(0.02f, 0.96f, 0.15f, 1.f));
 	if (status == DEAD && (frameCounter % 100) < 80) {
 		text.render("GAME OVER", glm::vec2(50, 224), 80, glm::vec4(0.02f, 0.96f, 0.15f, 1.f));
+		text.render("Press any key to continue.", glm::vec2(130, 324), 20, glm::vec4(0.02f, 0.96f, 0.15f, 1.f));
 	}	
 	if (status == STAGE_CLEAR && (frameCounter % 100) < 80) {
 		text.render("STAGE CLEARED", glm::vec2(60, 224), 50, glm::vec4(0.02f, 0.96f, 0.15f, 1.f));

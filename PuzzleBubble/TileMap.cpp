@@ -296,13 +296,13 @@ void TileMap::checkExplosions(glm::vec2 newBallPos, int color)
 				}
 				if (!hanging) {
 					mustExplode.push(j); mustExplode.push(i); mustExplode.push(logicMatrix[i][j]);
-					eraseInMap.push(j); eraseInMap.push(i);
 					logicMatrix[i][j] = 0;
 					map[logicToMapMatrix[i][j]] = 0;
 				}
 			}
 		}		
 	}	
+	this->prepareArrays(minCoordsRedraw, programRedraw);
 }
 
 queue<int> TileMap::getMustExplode()
@@ -321,7 +321,7 @@ vector<vector<int>> TileMap::getLogicMatrix()
 	return logicMatrix;
 }
 
-int TileMap::screenToTileCellContent(glm::vec2 screenPos, int xDir)
+int TileMap::screenToTileCellContent(glm::vec2 screenPos)
 {
 	float offsetH = OFFSET_H;
 	float offsetV = OFFSET_V;
@@ -334,7 +334,7 @@ int TileMap::screenToTileCellContent(glm::vec2 screenPos, int xDir)
  	return map[yPos * mapSize.x + xPos];
 }
 
-void TileMap::insertBall(glm::vec2 position, int xDir, int color)
+void TileMap::insertBall(glm::vec2 position, int color)
 {
 	float offsetH = OFFSET_H;
 	float offsetV = OFFSET_V;
@@ -345,9 +345,7 @@ void TileMap::insertBall(glm::vec2 position, int xDir, int color)
 	
    	map[mapPos] = color + 1;
 	glm::vec2 logicPos;
-	checkExplosions(glm::vec2(mapToLogicMatrix[mapPos * 2], mapToLogicMatrix[mapPos * 2 + 1]), color + 1);
-	this->prepareArrays(minCoordsRedraw, programRedraw);	
-	this->render();
+	checkExplosions(glm::vec2(mapToLogicMatrix[mapPos * 2], mapToLogicMatrix[mapPos * 2 + 1]), color + 1);	
 }
 
 

@@ -99,6 +99,8 @@
   <ItemGroup>
     <Text Include="levels\level01.txt" />
     <Text Include="levels\levelBlank.txt" />
+    <Text Include="levels\level02.txt" />
+    <Text Include="levels\level03.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Debug\freeglut.dll" />

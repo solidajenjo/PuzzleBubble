@@ -38,6 +38,7 @@ private:
 	bool moving = false;
 	bool deleteBall = false;
 	int color;
+	int nextCellContent = 0;
 };
 
 

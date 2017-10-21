@@ -19,7 +19,7 @@ public:
 	void setWaitingTime(int time);
 	void setBlocked(bool status);
 	void render();
-	
+	bool anyKeyPressed();
 	
 private:
 	bool ballShot = false;

@@ -29,8 +29,8 @@ public:
 	void free();
 	vector<vector<int> > getLogicMatrix();
 	int getTileSize() const { return tileSize; }
-	int screenToTileCellContent(glm::vec2 screenPos, int xDir);
-	void insertBall(glm::vec2 position, int xDir, int color);
+	int screenToTileCellContent(glm::vec2 screenPos);
+	void insertBall(glm::vec2 position, int color);
 	bool update(int deltaTime);
 	bool checkDeath();
 	queue<int> getMustExplode();

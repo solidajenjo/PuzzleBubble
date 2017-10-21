@@ -2,9 +2,9 @@
 #include <GL/gl.h>
 #include "Ball.h"
 
-#define SPEED 0.8f
-#define LEFT_MARGIN 208
-#define RIGHT_MARGIN 426
+#define SPEED 1.5f
+#define LEFT_MARGIN 209
+#define RIGHT_MARGIN 425
 #define CENTER_CORRECTION_X 13.0f
 #define CENTER_CORRECTION_Y 19.0f
 
@@ -38,6 +38,7 @@ Ball::Ball(glm::vec2 geom[2], glm::vec2 texCoords[2], ShaderProgram &program)
 
 void Ball::render(glm::vec2 scale, Texture &tex) const
 {
+	if (nextCellContent != 0) return; //if is in an ocupied cell don't render
 	glm::mat4 modelview;
 	program->use();
 	modelview = glm::translate(glm::mat4(1.0f), glm::vec3(position.x - CENTER_CORRECTION_X, position.y - CENTER_CORRECTION_Y, 0.f));
@@ -55,48 +56,22 @@ void Ball::render(glm::vec2 scale, Texture &tex) const
 
 void Ball::update(int deltaTime, TileMap *tileMap)
 {			
- 	if (position.x > RIGHT_MARGIN) direction.x = -direction.x;
-	if (position.x < LEFT_MARGIN) direction.x = -direction.x;	
-	float dXSpeed = direction.x * SPEED *deltaTime;
-	float dYSpeed = direction.y * SPEED *deltaTime;
-	position.x += dXSpeed;
-	position.y += dYSpeed;
-
-	/*Collision with ocupied cells with 3 points in fan form like 
-
-			\|/
-			 O
-
-	*/
-	nextFramePosition[1].x = position.x + direction.x * 28.f;
-	nextFramePosition[1].y = position.y + direction.y * 28.f;
-
-	if (position.x > RIGHT_MARGIN) nextFramePosition[1].x = position.x - direction.x * 28;
-	if (position.x < LEFT_MARGIN) nextFramePosition[1].x = position.x - direction.x * 28;
-
-	glm::vec2 sideVector = glm::vec2(position.x + direction.x * 20.f, position.y + direction.y * 20.f); //side vectors slightly shorter
-	glm::mat4 rotMat = glm::translate(glm::mat4(1.0f), glm::vec3(sideVector, 0.f));
-	rotMat = glm::rotate(rotMat, 0.5f, glm::vec3(0.f, 0.f, 1.f));
-	rotMat = glm::translate(rotMat, glm::vec3(-position.x, -position.y, 0.f));
-	nextFramePosition[2] = glm::vec2(rotMat * glm::vec4(sideVector, 0.f, 1.f));
-
-	rotMat = glm::translate(glm::mat4(1.0f), glm::vec3(sideVector, 0.f));
-	rotMat = glm::rotate(rotMat, -0.5f, glm::vec3(0.f, 0.f, 1.f));
-	rotMat = glm::translate(rotMat, glm::vec3(-position.x, -position.y, 0.f));
-	nextFramePosition[0] = glm::vec2(rotMat * glm::vec4(sideVector, 0.f, 1.f));
-
-	int xDir;
-	if (direction.x < 0) xDir = -1;
-	else if (direction.x > 0) xDir = 1;
-	else xDir = 0;
-	int nextCellContent = tileMap->screenToTileCellContent(nextFramePosition[0], xDir) +
-		tileMap->screenToTileCellContent(nextFramePosition[1], xDir) +
-		tileMap->screenToTileCellContent(nextFramePosition[2], xDir);
 	if (nextCellContent != 0) {
-		tileMap->insertBall(glm::vec2(position.x, position.y - CENTER_CORRECTION_Y * 0.8f), -xDir, color);
+		//if collision then rewind one position
+		float dXSpeed = -direction.x * SPEED *deltaTime;
+		float dYSpeed = -direction.y * SPEED *deltaTime;
+		position.x += dXSpeed;
+		position.y += dYSpeed;
+		tileMap->insertBall(glm::vec2(position.x, position.y), color);
 		moving = false;
 		deleteBall = true;
 	}
+ 	if (position.x > RIGHT_MARGIN || position.x < LEFT_MARGIN) direction.x = -direction.x;	
+	float dXSpeed = direction.x * SPEED *deltaTime;
+	float dYSpeed = direction.y * SPEED *deltaTime;
+	position.x += dXSpeed;
+	position.y += dYSpeed;	
+	nextCellContent = tileMap->screenToTileCellContent(position);
 }
 
 void Ball::setPosition(glm::vec2 position)
