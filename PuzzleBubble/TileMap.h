@@ -6,6 +6,7 @@
 #include <vector>
 #include <queue>
 #include "Texture.h"
+#include "Sound.h"
 #include "ShaderProgram.h"
 
 
@@ -36,6 +37,8 @@ public:
 	queue<int> getMustExplode();
 	int getBallsNumber();
 	void resetMustExplode();
+	void ballInsertedAcquired();
+	bool getBallInserted();
 private:
 	bool loadLevel(const string &levelFile);
 	void prepareArrays(const glm::vec2 &minCoords, ShaderProgram &program);
@@ -44,7 +47,6 @@ private:
 	vector<int>	mapToLogicMatrix;
 	void incLineOffset();
 	void checkExplosions(glm::vec2 newBallPos, int color);	
-private:
 	GLuint vao;
 	GLuint vbo;
 	GLint posLocation, texCoordLocation;
@@ -60,6 +62,7 @@ private:
 	ShaderProgram programRedraw;
 	queue<int> mustExplode;
 	bool fillLogToMap = true;
+	bool ballInserted = false;
 };
 
 

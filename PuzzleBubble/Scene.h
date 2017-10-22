@@ -9,7 +9,9 @@
 #include "Quad.h"
 #include "Ball.h"
 #include "Text.h"
-
+#include "Sound.h"
+#include "dependencies\openal\include\al.h"
+#include "dependencies\openal\include\alc.h"
 
 // Scene contains all the entities of our game.
 // It is responsible for updating and render them.
@@ -28,8 +30,6 @@ public:
 
 private:
 	void initShaders();
-
-private:
 	TileMap *map;
 	Player *player;
 	ShaderProgram texProgram, textProgram;
@@ -42,6 +42,7 @@ private:
 	Ball *currentBall, *nextBall, *movingBall = NULL;
 	int status, score, frameCounter;
 	Text text;
+	Sound *gameLoop, *screenMovementSound, *ballStopingSound, *stageClear;
 };
 
 

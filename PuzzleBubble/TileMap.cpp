@@ -126,10 +126,10 @@ void TileMap::prepareArrays(const glm::vec2 &minCoords, ShaderProgram &program)
 			logicToMapMatrix[j][xLog] = mapPos;
 			mapToLogicMatrix[mapPos * 2] = xLog;
 			mapToLogicMatrix[mapPos * 2 + 1] = j;
-			if(tile != 0 && tile != 9)
+			if(tile != 0)
 			{
 				// Non-empty tile
-				ballsNumber++;
+				if (tile != 9) ballsNumber++;
 				nTiles++;
 				float offsetH = OFFSET_H;
 				float offsetV = OFFSET_V;
@@ -316,6 +316,16 @@ void TileMap::resetMustExplode()
 	mustExplode = queue<int>();
 }
 
+void TileMap::ballInsertedAcquired()
+{
+	ballInserted = false;
+}
+
+bool TileMap::getBallInserted()
+{
+	return ballInserted;
+}
+
 vector<vector<int>> TileMap::getLogicMatrix()
 {
 	return logicMatrix;
@@ -345,6 +355,7 @@ void TileMap::insertBall(glm::vec2 position, int color)
 	
    	map[mapPos] = color + 1;
 	glm::vec2 logicPos;
+	ballInserted = true;
 	checkExplosions(glm::vec2(mapToLogicMatrix[mapPos * 2], mapToLogicMatrix[mapPos * 2 + 1]), color + 1);	
 }
 

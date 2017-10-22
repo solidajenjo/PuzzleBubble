@@ -211,3 +211,42 @@ GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
 PuzzleBubble.VC.opendb
+PuzzleBubble/dependencies/openal/docs/Effects Extension Guide.pdf
+PuzzleBubble/dependencies/openal/docs/OpenAL 1.1 Specification.pdf
+PuzzleBubble/dependencies/openal/docs/OpenAL Deployment Guide.pdf
+PuzzleBubble/dependencies/openal/docs/OpenAL Programmer's Guide.pdf
+PuzzleBubble/dependencies/openal/include/al.h
+PuzzleBubble/dependencies/openal/include/alc.h
+PuzzleBubble/dependencies/openal/include/alut.h
+PuzzleBubble/dependencies/openal/include/efx-creative.h
+PuzzleBubble/dependencies/openal/include/EFX-Util.h
+PuzzleBubble/dependencies/openal/include/efx.h
+PuzzleBubble/dependencies/openal/include/xram.h
+PuzzleBubble/dependencies/openal/libs/Win32/ALut.lib
+PuzzleBubble/dependencies/openal/libs/Win32/EFX-Util_MT/EFX-Util.lib
+PuzzleBubble/dependencies/openal/libs/Win32/EFX-Util.lib
+PuzzleBubble/dependencies/openal/libs/Win32/EFX-Util_MTDLL/EFX-Util.lib
+PuzzleBubble/dependencies/openal/libs/Win32/OpenAL32.lib
+PuzzleBubble/dependencies/openal/libs/Win64/EFX-Util_MT/EFX-Util.lib
+PuzzleBubble/dependencies/openal/libs/Win64/EFX-Util_MTDLL/EFX-Util.lib
+PuzzleBubble/dependencies/openal/libs/Win64/OpenAL32.lib
+PuzzleBubble/dependencies/openal/redist/oalinst.exe
+PuzzleBubble/dependencies/openal/samples/capture/Source/Capture.cpp
+PuzzleBubble/dependencies/openal/samples/capture/Win32/Capture2003.sln
+PuzzleBubble/dependencies/openal/samples/capture/Win32/Capture2003.vcproj
+PuzzleBubble/dependencies/openal/samples/capture/Win32/Capture2005.sln
+PuzzleBubble/dependencies/openal/samples/capture/Win32/Capture2005.vcproj
+PuzzleBubble/dependencies/openal/samples/capture/Win64/Capture2005.sln
+PuzzleBubble/dependencies/openal/samples/capture/Win64/Capture2005.vcproj
+PuzzleBubble/dependencies/openal/samples/efxenumerate/Source/EFXEnumerate.cpp
+PuzzleBubble/dependencies/openal/samples/efxenumerate/Win32/EFXEnumerate2003.sln
+*.vcproj
+PuzzleBubble/dependencies/openal/samples/efxenumerate/Win32/EFXEnumerate2005.sln
+PuzzleBubble/dependencies/openal/samples/efxenumerate/Win64/EFXEnumerate2005.sln
+PuzzleBubble/dependencies/openal/samples/efxfilter/Source/EFXFilter.cpp
+PuzzleBubble/dependencies/openal/samples/efxfilter/Win32/EFXFilter2003.sln
+PuzzleBubble/dependencies/openal/samples/efxfilter/Win32/EFXFilter2005.sln
+PuzzleBubble/dependencies/openal/samples/efxfilter/Win64/EFXFilter2005.sln
+PuzzleBubble/dependencies/openal/samples/efxreverb/Source/EFXReverb.cpp
+PuzzleBubble/dependencies/openal/samples/efxreverb/Win32/EFXReverb2003.sln
+PuzzleBubble/dependencies/openal/samples/efxreverb/Win32/EFXReverb2005.sln

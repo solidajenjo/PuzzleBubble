@@ -22,7 +22,8 @@
 #define NEXT_BALL_X 234
 #define NEXT_BALL_Y 450
 //timer definitons
-#define UPDATE_TIME 30000 //20000
+#define SCREEN_MOVEMENT_SOUND 3000 
+#define UPDATE_TIME 20000 //20000
 //states definitions
 #define PLAYING 1
 #define UPDATING_BOARD 2
@@ -52,6 +53,7 @@ void Scene::init()
 	status = PLAYING;
 	srand(time(NULL));
 	initShaders();
+	//init balls
 	ballsTex.loadFromFile("images/balls.png", TEXTURE_PIXEL_FORMAT_RGBA);
 	ballsTex.setWrapS(GL_CLAMP_TO_EDGE);
 	ballsTex.setWrapT(GL_CLAMP_TO_EDGE);
@@ -91,6 +93,7 @@ void Scene::init()
 	nextBall->setPosition(glm::vec2(NEXT_BALL_X, NEXT_BALL_Y));
 	nextBall->setColor(color);
 
+	//init board
 	skinTex.loadFromFile("images/skin.png", TEXTURE_PIXEL_FORMAT_RGBA);
 	skinTex.setWrapS(GL_CLAMP_TO_EDGE);
 	skinTex.setWrapT(GL_CLAMP_TO_EDGE);
@@ -108,15 +111,23 @@ void Scene::init()
 	background->setSpriteCenter(glm::vec2(200.f, 313.f));
 
 	map = TileMap::createTileMap(levels[level++], glm::vec2(SCREEN_X, SCREEN_Y), texProgram);
+	//init text
+	if (!text.init("fonts/Retro Computer_DEMO.ttf"))
+		cout << "Could not load font!!!" << endl;
+	//init sound
+	gameLoop = new Sound("sounds/mainLoop.wav");
+	screenMovementSound = new Sound("sounds/Quake.wav");
+	ballStopingSound = new Sound("sounds/ballStoping.wav");
+	stageClear = new Sound("sounds/stageClear.wav");
+	//init player
 	player = new Player();
 	player->init(glm::ivec2(SCREEN_X, SCREEN_Y), texProgram, glm::vec2(PLAYER_POS_X, PLAYER_POS_Y));
 	projection = glm::ortho(0.f, float(SCREEN_WIDTH - 1), float(SCREEN_HEIGHT - 1), 0.f);
+	//init game parameters
 	currentTime = 0.0f;
 	score = 0;
 	frameCounter = 0;
-	updateScreenTimer = UPDATE_TIME;
-	if(!text.init("fonts/Retro Computer_DEMO.ttf"))
-		cout << "Could not load font!!!" << endl;
+	updateScreenTimer = UPDATE_TIME;	
 }
 
 void Scene::update(int deltaTime)
@@ -135,12 +146,12 @@ void Scene::update(int deltaTime)
 	currentTime += deltaTime;
 	updateScreenTimer -= deltaTime;
 	player->update(deltaTime, currentBall);	
-	if (updateScreenTimer < 0 && status == PLAYING) {
-		//insert sound moving board
+	if (updateScreenTimer < SCREEN_MOVEMENT_SOUND && status == PLAYING) screenMovementSound->play();
+	if (updateScreenTimer < 0 && status == PLAYING) {		
 		status = UPDATING_BOARD;
 	}
 	switch (status) {
-	case STAGE_CLEAR:		
+	case STAGE_CLEAR:
 		map->render();
 		if (updateScreenTimer < 0) {
 			updateScreenTimer = 0;
@@ -156,12 +167,18 @@ void Scene::update(int deltaTime)
 		if (map->update(deltaTime)) {			
 			status = PLAYING;			
 			updateScreenTimer = UPDATE_TIME;
+			screenMovementSound->stop();
 		}
 		break;
 	case PLAYING:
+		gameLoop->playLoop();
 		if (map->checkDeath()) {
 			status = DEAD;
-		}		
+		}	
+		if (map->getBallInserted()) {
+			ballStopingSound->play();
+			map->ballInsertedAcquired();
+		}
 		if (movingBall != NULL) {
 			textProgram.use();
 			textProgram.use();
@@ -196,6 +213,8 @@ void Scene::update(int deltaTime)
 		}
 		if (map->getBallsNumber() == 0) {
 			status = STAGE_CLEAR;
+			gameLoop->stop();
+			stageClear->play();
 			updateScreenTimer = UPDATE_TIME / 20;
 		}
 		break;
