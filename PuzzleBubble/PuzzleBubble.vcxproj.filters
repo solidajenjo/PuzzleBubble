@@ -57,6 +57,9 @@
     <ClInclude Include="Sound.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Menu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Game.cpp">
@@ -101,12 +104,17 @@
     <ClCompile Include="Sound.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Menu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="levels\level01.txt" />
     <Text Include="levels\levelBlank.txt" />
     <Text Include="levels\level02.txt" />
     <Text Include="levels\level03.txt" />
+    <Text Include="levels\level04.txt" />
+    <Text Include="levels\level05.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Debug\freeglut.dll" />

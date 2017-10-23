@@ -15,7 +15,6 @@ public:
 	static Ball *createBall(glm::vec2 geom[2], glm::vec2 texCoords[2], ShaderProgram &program);
 
 	Ball(glm::vec2 geom[2], glm::vec2 texCoords[2], ShaderProgram &program);
-
 	void render(glm::vec2 scale, Texture &tex) const;
 	void update(int deltaTime, TileMap *tileMap);
 	void setPosition(glm::vec2 position);

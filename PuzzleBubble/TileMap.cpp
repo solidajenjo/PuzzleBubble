@@ -9,19 +9,23 @@ using namespace std;
 
 #define PIXEL_MOVE_PER_FRAME .2f
 #define DEATH_LINE 13
-#define OFFSET_H 145.f;
-#define OFFSET_V 6.f;
+#define OFFSET_H 145.f
+#define OFFSET_V 6.f
+#define PRESS_START_X 190.f
+#define PRESS_START_Y -365.f
 
 TileMap *TileMap::createTileMap(const string &levelFile, const glm::vec2 &minCoords, ShaderProgram &program)
 {
-	TileMap *map = new TileMap(levelFile, minCoords, program);
-	
+	TileMap *map = new TileMap(levelFile, minCoords, program);	
 	return map;
 }
 
 
 TileMap::TileMap(const string &levelFile, const glm::vec2 &minCoords, ShaderProgram &program)
 {
+	this->programRedraw = program;
+	this->pressProgram = program;
+	initPress();
 	loadLevel(levelFile);
 	prepareArrays(minCoords, program);
 }
@@ -34,14 +38,19 @@ TileMap::~TileMap()
 
 
 void TileMap::render() const
-{
+{	
 	glEnable(GL_TEXTURE_2D);
 	tilesheet.use();
 	glBindVertexArray(vao);
 	glEnableVertexAttribArray(posLocation);
 	glEnableVertexAttribArray(texCoordLocation);
 	glDrawArrays(GL_TRIANGLES, 0, 6 * mapSize.x * mapSize.y);
-	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_TEXTURE_2D);	
+	if (press != nullptr) {
+		//pressTex.use();
+		press->setPosition(glm::vec2(PRESS_START_X, PRESS_START_Y + pixelOffset + lineOffset * tileSize));
+		press->render();
+	}
 }
 
 void TileMap::free()
@@ -100,14 +109,13 @@ bool TileMap::loadLevel(const string &levelFile)
 	fin.close();
 	logicMatrix = vector<vector<int> >(mapSize.y + lineOffset, vector<int>(mapSize.x * 2, 0));
 	logicToMapMatrix = vector<vector<int> >(mapSize.y + lineOffset, vector<int>(mapSize.x * 2, 0));
-	mapToLogicMatrix = vector<int>(mapSize.x * mapSize.y * 2, 0);
+	mapToLogicMatrix = vector<int>(mapSize.x * mapSize.y * 2, 0);	
 	return true;
 }
 
 void TileMap::prepareArrays(const glm::vec2 &minCoords, ShaderProgram &program)
 {
 	this->minCoordsRedraw = minCoords;
-	this->programRedraw = program;
 	int tile, nTiles = 0;
 	glm::vec2 posTile, texCoordTile[2], halfTexel;
 	vector<float> vertices;
@@ -326,6 +334,16 @@ bool TileMap::getBallInserted()
 	return ballInserted;
 }
 
+void TileMap::initPress()
+{
+	pressTex.loadFromFile("images/press.png", TEXTURE_PIXEL_FORMAT_RGBA);
+	pressTex.setWrapS(GL_CLAMP_TO_EDGE);
+	pressTex.setWrapT(GL_CLAMP_TO_EDGE);
+	pressTex.setMinFilter(GL_NEAREST);
+	pressTex.setMagFilter(GL_NEAREST);
+	press = new Sprite(glm::ivec2(258.f, 414.f), glm::vec2(1, 1), &pressTex, &pressProgram);
+}
+
 vector<vector<int>> TileMap::getLogicMatrix()
 {
 	return logicMatrix;
@@ -373,6 +391,7 @@ bool TileMap::update(int deltaTime)
 		result = true;
 	}
 	this->prepareArrays(minCoordsRedraw, programRedraw);
+	press->setPosition(glm::vec2(PRESS_START_X, PRESS_START_Y + pixelOffset + lineOffset * tileSize));
 	this->render();
 	return result;
 }

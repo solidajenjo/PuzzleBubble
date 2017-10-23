@@ -15,13 +15,6 @@ void Sound::play()
 	SDL_PauseAudioDevice(deviceId, 0);
 }
 
-void Sound::playLoop()
-{
-	SDL_AudioStatus status = SDL_GetAudioStatus();
-	if (status != SDL_AUDIO_PLAYING) {
-		this->play();
-	}
-}
 
 void Sound::stop()
 {

@@ -7,6 +7,7 @@
 #include <queue>
 #include "Texture.h"
 #include "Sound.h"
+#include "Sprite.h"
 #include "ShaderProgram.h"
 
 
@@ -39,6 +40,7 @@ public:
 	void resetMustExplode();
 	void ballInsertedAcquired();
 	bool getBallInserted();
+	void initPress();
 private:
 	bool loadLevel(const string &levelFile);
 	void prepareArrays(const glm::vec2 &minCoords, ShaderProgram &program);
@@ -59,10 +61,12 @@ private:
 	int ballsNumber = 0;
 	float pixelOffset = 0.f;
 	glm::vec2 minCoordsRedraw;
-	ShaderProgram programRedraw;
+	ShaderProgram programRedraw, pressProgram;
 	queue<int> mustExplode;
 	bool fillLogToMap = true;
 	bool ballInserted = false;
+	Texture pressTex;
+	Sprite *press;
 };
 
 

@@ -22,16 +22,18 @@
 #define NEXT_BALL_X 234
 #define NEXT_BALL_Y 450
 //timer definitons
-#define SCREEN_MOVEMENT_SOUND 3000 
 #define UPDATE_TIME 20000 //20000
+//music definitions
+#define MUSIC_GAP 24000 // too many calls to sound->play()
+#define PRE_MOVEMEMENT_SOUND 2000
 //states definitions
 #define PLAYING 1
 #define UPDATING_BOARD 2
 #define DEAD 3
 #define STAGE_CLEAR 4
 #define MENU 5
-#define NUMBER_OF_LEVELS 3
-char* levels[] = {"levels/level01.txt", "levels/level02.txt", "levels/level03.txt"};
+#define NUMBER_OF_LEVELS 5
+char* levels[] = {"levels/level01.txt", "levels/level02.txt", "levels/level03.txt",  "levels/level04.txt",  "levels/level05.txt" };
 int level = 0;
 Scene::Scene()
 {
@@ -45,6 +47,24 @@ Scene::~Scene()
 		delete map;
 	if(player != NULL)
 		delete player;
+	if (skin != NULL)
+		delete skin;
+	if (background != NULL)
+		delete background;
+	if (currentBall != NULL)
+		delete currentBall;
+	if (nextBall != NULL)
+		delete nextBall;
+	if (movingBall != NULL)
+		delete movingBall;
+	if (gameLoop != NULL)
+		delete gameLoop;
+	if (screenMovementSound != NULL)
+		delete screenMovementSound;
+	if (ballStopingSound != NULL)
+		delete ballStopingSound;
+	if (stageClear != NULL)
+		delete stageClear;
 }
 
 
@@ -128,6 +148,7 @@ void Scene::init()
 	score = 0;
 	frameCounter = 0;
 	updateScreenTimer = UPDATE_TIME;	
+	musicTimer = 0;
 }
 
 void Scene::update(int deltaTime)
@@ -145,14 +166,20 @@ void Scene::update(int deltaTime)
 	}
 	currentTime += deltaTime;
 	updateScreenTimer -= deltaTime;
-	player->update(deltaTime, currentBall);	
-	if (updateScreenTimer < SCREEN_MOVEMENT_SOUND && status == PLAYING) screenMovementSound->play();
-	if (updateScreenTimer < 0 && status == PLAYING) {		
-		status = UPDATING_BOARD;
+	player->update(deltaTime, currentBall);		
+	if (updateScreenTimer - PRE_MOVEMEMENT_SOUND < 0 && status == PLAYING && !screenSoundPlaying) {
+		screenMovementSound->play();
+		screenSoundPlaying = true;
 	}
+	if (updateScreenTimer < 0 && status == PLAYING) {		
+		status = UPDATING_BOARD;		
+	}
+	if (screenSoundPlaying)	skin->setPosition(glm::vec2(16.f + 3 - (rand() % 6), 8.f));
 	switch (status) {
 	case STAGE_CLEAR:
-		map->render();
+		screenMovementSound->stop();
+		screenSoundPlaying = false;
+		//map->render();
 		if (updateScreenTimer < 0) {
 			updateScreenTimer = 0;
 			if (player->anyKeyPressed() && level < NUMBER_OF_LEVELS) {
@@ -162,16 +189,20 @@ void Scene::update(int deltaTime)
 			}
 		}
 		break;
-	case UPDATING_BOARD:
-		skin->setPosition(glm::vec2(16.f + 2 - (rand()%4), 8.f));		
+	case UPDATING_BOARD:		
 		if (map->update(deltaTime)) {			
 			status = PLAYING;			
 			updateScreenTimer = UPDATE_TIME;
 			screenMovementSound->stop();
+			screenSoundPlaying = false;
 		}
 		break;
 	case PLAYING:
-		gameLoop->playLoop();
+		musicTimer -= deltaTime;
+		if (musicTimer <= 0) {
+			gameLoop->play();
+			musicTimer = MUSIC_GAP;
+		}
 		if (map->checkDeath()) {
 			status = DEAD;
 		}	
@@ -254,7 +285,7 @@ void Scene::render(int deltaTime)
 		textProgram.setUniformMatrix4f("projection", projection);
 		textProgram.setUniform4f("color", 1.0f, 1.0f, 1.0f, 1.0f);	
 	}
-	text.render("SCORE = " + to_string(score), glm::vec2(240, 24), 16, glm::vec4(0.02f, 0.96f, 0.15f, 1.f));
+	text.render("LEVEL "+to_string(level)+"             SCORE = " + to_string(score), glm::vec2(210, 24), 12, glm::vec4(0.02f, 0.96f, 0.15f, 1.f));
 	if (status == DEAD && (frameCounter % 100) < 80) {
 		text.render("GAME OVER", glm::vec2(50, 224), 80, glm::vec4(0.02f, 0.96f, 0.15f, 1.f));
 		text.render("Press any key to continue.", glm::vec2(130, 324), 20, glm::vec4(0.02f, 0.96f, 0.15f, 1.f));

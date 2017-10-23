@@ -8,7 +8,6 @@ class Sound
 public:
 	Sound(char *soundFile);
 	void play();
-	void playLoop();
 	void stop();
 
 	~Sound();

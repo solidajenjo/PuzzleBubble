@@ -10,8 +10,7 @@
 #include "Ball.h"
 #include "Text.h"
 #include "Sound.h"
-#include "dependencies\openal\include\al.h"
-#include "dependencies\openal\include\alc.h"
+
 
 // Scene contains all the entities of our game.
 // It is responsible for updating and render them.
@@ -40,9 +39,10 @@ private:
 	Texture skinTex, ballsTex, bgTex;	
 	vector<glm::vec2> ballsCoords; //balls tex coords
 	Ball *currentBall, *nextBall, *movingBall = NULL;
-	int status, score, frameCounter;
+	int status, score, frameCounter, musicTimer;
 	Text text;
 	Sound *gameLoop, *screenMovementSound, *ballStopingSound, *stageClear;
+	bool screenSoundPlaying = false;
 };
 
 

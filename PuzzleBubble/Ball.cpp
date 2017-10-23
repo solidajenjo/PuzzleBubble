@@ -2,9 +2,9 @@
 #include <GL/gl.h>
 #include "Ball.h"
 
-#define SPEED 1.5f
-#define LEFT_MARGIN 209
-#define RIGHT_MARGIN 425
+#define SPEED 1.4f
+#define LEFT_MARGIN 213
+#define RIGHT_MARGIN 421
 #define CENTER_CORRECTION_X 13.0f
 #define CENTER_CORRECTION_Y 19.0f
 
