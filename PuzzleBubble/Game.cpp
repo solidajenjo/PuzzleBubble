@@ -89,6 +89,7 @@ void Game::loadGame()
 void Game::setStatus(int status)
 {
 	this->status = status;
+	if (status == 0) menu.init();
 }
 
 

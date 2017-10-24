@@ -82,8 +82,7 @@ void Menu::update(int deltaTime)
 		delete menuSelector;
 		delete menuBackground;
 		delete menuText;
-		Game::instance().loadGame();
-		_sleep(2000);
+		Game::instance().loadGame();		
 		Game::instance().setStatus(1);
 	}
 	if (Game::instance().getSpecialKey(101) && menuPos > 0 && keyTimer <= 0) {

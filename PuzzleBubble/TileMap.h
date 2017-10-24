@@ -31,7 +31,7 @@ public:
 	void free();
 	vector<vector<int> > getLogicMatrix();
 	int getTileSize() const { return tileSize; }
-	int screenToTileCellContent(glm::vec2 screenPos);
+	int screenToTileCellContent(glm::vec2 screenPos, bool special);
 	void insertBall(glm::vec2 position, int color);
 	bool update(int deltaTime);
 	bool checkDeath();

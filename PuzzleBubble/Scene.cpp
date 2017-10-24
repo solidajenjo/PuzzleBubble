@@ -34,7 +34,7 @@
 #define MENU 5
 #define NUMBER_OF_LEVELS 5
 char* levels[] = {"levels/level01.txt", "levels/level02.txt", "levels/level03.txt",  "levels/level04.txt",  "levels/level05.txt" };
-int level = 0;
+int level = 2;
 Scene::Scene()
 {
 	map = NULL;
@@ -65,6 +65,8 @@ Scene::~Scene()
 		delete ballStopingSound;
 	if (stageClear != NULL)
 		delete stageClear;
+	if (scoreSound != NULL)
+		delete scoreSound;
 }
 
 
@@ -139,6 +141,8 @@ void Scene::init()
 	screenMovementSound = new Sound("sounds/Quake.wav");
 	ballStopingSound = new Sound("sounds/ballStoping.wav");
 	stageClear = new Sound("sounds/stageClear.wav");
+	scoreSound = new Sound("sounds/score.wav");
+	gameOverSound = new Sound("sounds/gameOver.wav");
 	//init player
 	player = new Player();
 	player->init(glm::ivec2(SCREEN_X, SCREEN_Y), texProgram, glm::vec2(PLAYER_POS_X, PLAYER_POS_Y));
@@ -149,6 +153,7 @@ void Scene::init()
 	frameCounter = 0;
 	updateScreenTimer = UPDATE_TIME;	
 	musicTimer = 0;
+	specialBallDogWatch = 5;
 }
 
 void Scene::update(int deltaTime)
@@ -156,12 +161,15 @@ void Scene::update(int deltaTime)
 	queue<int> ballsToExplode = map->getMustExplode(); // format x / y / color * in logic coords TODO change logic to screen
 	if (ballsToExplode.size() > 0) {
 		//animacion explosion bolas
+		scoreSound->stop();
 		score += (ballsToExplode.size() / 3) * 10;
+		scoreSound->play();
 		map->resetMustExplode();
 	}
 	skin->setPosition(glm::vec2(16.f, 8.f));
 	background->setPosition(glm::vec2(386.f, 340.f));
 	if (status == DEAD) {
+		if (player->anyKeyPressed()) Game::instance().setStatus(0);
 		return;
 	}
 	currentTime += deltaTime;
@@ -177,15 +185,17 @@ void Scene::update(int deltaTime)
 	if (screenSoundPlaying)	skin->setPosition(glm::vec2(16.f + 3 - (rand() % 6), 8.f));
 	switch (status) {
 	case STAGE_CLEAR:
+		delete(movingBall);
+		movingBall = NULL;
 		screenMovementSound->stop();
 		screenSoundPlaying = false;
-		//map->render();
 		if (updateScreenTimer < 0) {
 			updateScreenTimer = 0;
 			if (player->anyKeyPressed() && level < NUMBER_OF_LEVELS) {
 				map = TileMap::createTileMap(levels[level++], glm::vec2(SCREEN_X, SCREEN_Y), texProgram);
 				status = PLAYING;
 				updateScreenTimer = UPDATE_TIME;
+				musicTimer = 0;
 			}
 		}
 		break;
@@ -199,17 +209,22 @@ void Scene::update(int deltaTime)
 		break;
 	case PLAYING:
 		musicTimer -= deltaTime;
+		if (map->checkDeath()) {
+			status = DEAD;
+			delete(movingBall);
+			movingBall = NULL;
+			gameLoop->stop();
+			gameOverSound->play();
+			return;
+		}
 		if (musicTimer <= 0) {
 			gameLoop->play();
 			musicTimer = MUSIC_GAP;
 		}
-		if (map->checkDeath()) {
-			status = DEAD;
-		}	
 		if (map->getBallInserted()) {
 			ballStopingSound->play();
 			map->ballInsertedAcquired();
-		}
+		}		
 		if (movingBall != NULL) {
 			textProgram.use();
 			textProgram.use();
@@ -219,10 +234,7 @@ void Scene::update(int deltaTime)
 			movingBall->update(deltaTime, map);
 			if (movingBall->isDelete()) {
 				delete(movingBall);
-				movingBall = NULL;
-				if (map->checkDeath()) {
-					status = DEAD;
-				}
+				movingBall = NULL;				
 			}
 		}
 		if (player->isBallShot()) {
@@ -237,6 +249,12 @@ void Scene::update(int deltaTime)
 			currentBall = nextBall;
 			currentBall->setPosition(glm::vec2(INITIAL_BALL_X, INITIAL_BALL_Y));
 			int color = rand() % 5;
+			int specialBall = rand() % 100;
+			specialBallDogWatch--;
+			if (specialBall < 20 && specialBallDogWatch <= 0) { //chance of special ball 20%
+				color = 7; 
+				specialBallDogWatch = 5; //Minimum 5 balls between each special ball
+			}
 			texCoords[0] = ballsCoords[color * 2]; texCoords[1] = ballsCoords[(color * 2) + 1];
 			nextBall = Ball::createBall(geom, texCoords, texProgram);
 			nextBall->setColor(color);

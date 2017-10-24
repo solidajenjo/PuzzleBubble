@@ -13,6 +13,7 @@ using namespace std;
 #define OFFSET_V 6.f
 #define PRESS_START_X 190.f
 #define PRESS_START_Y -365.f
+#define SPECIAL_BALL 7
 
 TileMap *TileMap::createTileMap(const string &levelFile, const glm::vec2 &minCoords, ShaderProgram &program)
 {
@@ -349,7 +350,7 @@ vector<vector<int>> TileMap::getLogicMatrix()
 	return logicMatrix;
 }
 
-int TileMap::screenToTileCellContent(glm::vec2 screenPos)
+int TileMap::screenToTileCellContent(glm::vec2 screenPos, bool special)
 {
 	float offsetH = OFFSET_H;
 	float offsetV = OFFSET_V;
@@ -359,7 +360,15 @@ int TileMap::screenToTileCellContent(glm::vec2 screenPos)
 	if (yPos >= mapSize.y) return 0;
 	if (xPos >= mapSize.x) return 0;
 	if (xPos <= 0) return 0;
- 	return map[yPos * mapSize.x + xPos];
+	int mapPos = yPos * mapSize.x + xPos;
+	if (special && map[mapPos] != 0 && map[mapPos] != 9) {
+		mustExplode.push(mapToLogicMatrix[mapPos * 2]);
+		mustExplode.push(mapToLogicMatrix[mapPos * 2 + 1]);
+		mustExplode.push(map[mapPos]);
+		map[mapPos] = 0;
+		prepareArrays(minCoordsRedraw, programRedraw);
+	}
+ 	return map[mapPos];
 }
 
 void TileMap::insertBall(glm::vec2 position, int color)
@@ -371,7 +380,7 @@ void TileMap::insertBall(glm::vec2 position, int color)
 	int xPos = (position.x - offsetH - minCoordsRedraw.x) / tileSize;
 	int mapPos = yPos * mapSize.x + xPos;
 	
-   	map[mapPos] = color + 1;
+   	if (color != SPECIAL_BALL) map[mapPos] = color + 1;
 	glm::vec2 logicPos;
 	ballInserted = true;
 	checkExplosions(glm::vec2(mapToLogicMatrix[mapPos * 2], mapToLogicMatrix[mapPos * 2 + 1]), color + 1);	

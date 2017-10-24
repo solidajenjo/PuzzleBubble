@@ -39,9 +39,9 @@ private:
 	Texture skinTex, ballsTex, bgTex;	
 	vector<glm::vec2> ballsCoords; //balls tex coords
 	Ball *currentBall, *nextBall, *movingBall = NULL;
-	int status, score, frameCounter, musicTimer;
+	int status, score, frameCounter, musicTimer, specialBallDogWatch;
 	Text text;
-	Sound *gameLoop, *screenMovementSound, *ballStopingSound, *stageClear;
+	Sound *gameLoop, *screenMovementSound, *ballStopingSound, *stageClear, *scoreSound, *gameOverSound;
 	bool screenSoundPlaying = false;
 };
 
