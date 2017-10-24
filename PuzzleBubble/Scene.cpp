@@ -34,7 +34,7 @@
 #define MENU 5
 #define NUMBER_OF_LEVELS 5
 char* levels[] = {"levels/level01.txt", "levels/level02.txt", "levels/level03.txt",  "levels/level04.txt",  "levels/level05.txt" };
-int level = 2;
+int level = 0;
 Scene::Scene()
 {
 	map = NULL;
