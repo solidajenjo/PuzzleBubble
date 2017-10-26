@@ -36,6 +36,7 @@ public:
 	bool update(int deltaTime);
 	bool checkDeath();
 	queue<int> getMustExplode();
+	int howManyExplosions();
 	int getBallsNumber();
 	void resetMustExplode();
 	void ballInsertedAcquired();
@@ -46,6 +47,7 @@ private:
 	void prepareArrays(const glm::vec2 &minCoords, ShaderProgram &program);
 	vector<vector<int> > logicMatrix;
 	vector<vector<int> > logicToMapMatrix;
+	vector<vector<glm::vec2> >logicToScreen;
 	vector<int>	mapToLogicMatrix;
 	void incLineOffset();
 	void checkExplosions(glm::vec2 newBallPos, int color);	

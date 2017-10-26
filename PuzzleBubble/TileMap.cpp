@@ -110,6 +110,7 @@ bool TileMap::loadLevel(const string &levelFile)
 	fin.close();
 	logicMatrix = vector<vector<int> >(mapSize.y + lineOffset, vector<int>(mapSize.x * 2, 0));
 	logicToMapMatrix = vector<vector<int> >(mapSize.y + lineOffset, vector<int>(mapSize.x * 2, 0));
+	logicToScreen = vector<vector<glm::vec2> >(mapSize.y + lineOffset, vector<glm::vec2>(mapSize.x * 2));
 	mapToLogicMatrix = vector<int>(mapSize.x * mapSize.y * 2, 0);	
 	return true;
 }
@@ -135,15 +136,16 @@ void TileMap::prepareArrays(const glm::vec2 &minCoords, ShaderProgram &program)
 			logicToMapMatrix[j][xLog] = mapPos;
 			mapToLogicMatrix[mapPos * 2] = xLog;
 			mapToLogicMatrix[mapPos * 2 + 1] = j;
+			float offsetH = OFFSET_H;
+			float offsetV = OFFSET_V;
+			if (j % 2 == 1 - (lineOffset % 2)) offsetH -= 13.f;
+			posTile = glm::vec2(offsetH + minCoords.x + i * tileSize, pixelOffset + offsetV + minCoords.y + j * tileSize);
+			logicToScreen[j][xLog] = posTile;
 			if(tile != 0)
 			{
 				// Non-empty tile
 				if (tile != 9) ballsNumber++;
-				nTiles++;
-				float offsetH = OFFSET_H;
-				float offsetV = OFFSET_V;
-				if (j % 2 == 1 - (lineOffset % 2)) offsetH -= 13.f;
-				posTile = glm::vec2(offsetH + minCoords.x + i * tileSize, pixelOffset + offsetV + minCoords.y + j * tileSize);
+				nTiles++;				
 				texCoordTile[0] = glm::vec2(float((tile-1)%2) / tilesheetSize.x, float((tile-1)/2) / tilesheetSize.y);
 				texCoordTile[1] = texCoordTile[0] + tileTexSize;
 				//texCoordTile[0] += halfTexel;
@@ -316,7 +318,21 @@ void TileMap::checkExplosions(glm::vec2 newBallPos, int color)
 
 queue<int> TileMap::getMustExplode()
 {
-	return mustExplode;
+	queue<int> mustExplodeInScreenCoords;
+	while (!mustExplode.empty()) {
+		int x = mustExplode.front(); mustExplode.pop();
+		int y = mustExplode.front(); mustExplode.pop();
+		int color = mustExplode.front(); mustExplode.pop();
+		mustExplodeInScreenCoords.push(int(logicToScreen[y][x].x));
+		mustExplodeInScreenCoords.push(int(logicToScreen[y][x].y));
+		mustExplodeInScreenCoords.push(color);
+	}
+	return mustExplodeInScreenCoords;
+}
+
+int TileMap::howManyExplosions()
+{
+	return mustExplode.size();
 }
 
 

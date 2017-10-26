@@ -22,7 +22,7 @@
 #define NEXT_BALL_X 234
 #define NEXT_BALL_Y 450
 //timer definitons
-#define UPDATE_TIME 20000 //20000
+#define UPDATE_TIME 15000 //20000
 //music definitions
 #define MUSIC_GAP 24000 // too many calls to sound->play()
 #define PRE_MOVEMEMENT_SOUND 2000
@@ -157,14 +157,13 @@ void Scene::init()
 }
 
 void Scene::update(int deltaTime)
-{	
-	queue<int> ballsToExplode = map->getMustExplode(); // format x / y / color * in logic coords TODO change logic to screen
-	if (ballsToExplode.size() > 0) {
-		//animacion explosion bolas
+{		
+	if (map->howManyExplosions() > 0) {
+		queue<int> ballsToExplode = map->getMustExplode(); // format of queue [color -> y -> x] (x first) in screen coords
 		scoreSound->stop();
 		score += (ballsToExplode.size() / 3) * 10;
 		scoreSound->play();
-		map->resetMustExplode();
+		//animacion explosion bolas		
 	}
 	skin->setPosition(glm::vec2(16.f, 8.f));
 	background->setPosition(glm::vec2(386.f, 340.f));
