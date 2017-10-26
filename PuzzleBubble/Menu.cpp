@@ -14,7 +14,7 @@
 #define MAX_ROT 0.05f
 #define SELECTOR_X 35.f
 #define TIME_BETWEEN_KEYS 100
-#define MUSIC_GAP 41000 // time between calls to sound->play() 
+#define MUSIC_GAP 30000 // time between calls to sound->play() 
 
 glm::vec2 menuCoords[3] = { glm::vec2(SELECTOR_X,90.f), glm::vec2(SELECTOR_X,130.f), glm::vec2(SELECTOR_X,180.f) };
 
@@ -82,8 +82,7 @@ void Menu::update(int deltaTime)
 		delete menuSelector;
 		delete menuBackground;
 		delete menuText;
-		Game::instance().loadGame();
-		_sleep(2000);
+		Game::instance().loadGame();		
 		Game::instance().setStatus(1);
 	}
 	if (Game::instance().getSpecialKey(101) && menuPos > 0 && keyTimer <= 0) {

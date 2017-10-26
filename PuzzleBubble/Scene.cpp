@@ -22,7 +22,7 @@
 #define NEXT_BALL_X 234
 #define NEXT_BALL_Y 450
 //timer definitons
-#define UPDATE_TIME 20000 //20000
+#define UPDATE_TIME 15000 //20000
 //music definitions
 #define MUSIC_GAP 24000 // too many calls to sound->play()
 #define PRE_MOVEMEMENT_SOUND 2000
@@ -65,6 +65,8 @@ Scene::~Scene()
 		delete ballStopingSound;
 	if (stageClear != NULL)
 		delete stageClear;
+	if (scoreSound != NULL)
+		delete scoreSound;
 }
 
 
@@ -157,6 +159,8 @@ void Scene::init()
 	screenMovementSound = new Sound("sounds/Quake.wav");
 	ballStopingSound = new Sound("sounds/ballStoping.wav");
 	stageClear = new Sound("sounds/stageClear.wav");
+	scoreSound = new Sound("sounds/score.wav");
+	gameOverSound = new Sound("sounds/gameOver.wav");
 	//init player
 	player = new Player();
 	player->init(glm::ivec2(SCREEN_X, SCREEN_Y), texProgram, glm::vec2(PLAYER_POS_X, PLAYER_POS_Y));
@@ -167,12 +171,14 @@ void Scene::init()
 	frameCounter = 0;
 	updateScreenTimer = UPDATE_TIME;	
 	musicTimer = 0;
+	specialBallDogWatch = 5;
 }
 
 void Scene::update(int deltaTime)
-{	
-	queue<int> ballsToExplode = map->getMustExplode(); // format x / y / color * in logic coords TODO change logic to screen
-	if (ballsToExplode.size() > 0) {
+{		
+	if (map->howManyExplosions() > 0) {
+		queue<int> ballsToExplode = map->getMustExplode(); // format of queue [color -> y -> x] (x first) in screen coords
+		scoreSound->stop();
 		score += (ballsToExplode.size() / 3) * 10;
 		while (!ballsToExplode.empty()) {
 			ballsExploding.push(ballsToExplode.front());
@@ -184,6 +190,8 @@ void Scene::update(int deltaTime)
 			exploding = 1;
 		}
 		map->resetMustExplode();
+		scoreSound->play();
+		//animacion explosion bolas		
 	}
 	if (exploding) {
 		glm::vec2 texCoords[2];
@@ -195,6 +203,7 @@ void Scene::update(int deltaTime)
 	skin->setPosition(glm::vec2(16.f, 8.f));
 	background->setPosition(glm::vec2(386.f, 340.f));
 	if (status == DEAD) {
+		if (player->anyKeyPressed()) Game::instance().setStatus(0);
 		return;
 	}
 	currentTime += deltaTime;
@@ -210,15 +219,17 @@ void Scene::update(int deltaTime)
 	if (screenSoundPlaying)	skin->setPosition(glm::vec2(16.f + 3 - (rand() % 6), 8.f));
 	switch (status) {
 	case STAGE_CLEAR:
+		delete(movingBall);
+		movingBall = NULL;
 		screenMovementSound->stop();
 		screenSoundPlaying = false;
-		//map->render();
 		if (updateScreenTimer < 0) {
 			updateScreenTimer = 0;
 			if (player->anyKeyPressed() && level < NUMBER_OF_LEVELS) {
 				map = TileMap::createTileMap(levels[level++], glm::vec2(SCREEN_X, SCREEN_Y), texProgram);
 				status = PLAYING;
 				updateScreenTimer = UPDATE_TIME;
+				musicTimer = 0;
 			}
 		}
 		break;
@@ -232,17 +243,22 @@ void Scene::update(int deltaTime)
 		break;
 	case PLAYING:
 		musicTimer -= deltaTime;
+		if (map->checkDeath()) {
+			status = DEAD;
+			delete(movingBall);
+			movingBall = NULL;
+			gameLoop->stop();
+			gameOverSound->play();
+			return;
+		}
 		if (musicTimer <= 0) {
 			gameLoop->play();
 			musicTimer = MUSIC_GAP;
 		}
-		if (map->checkDeath()) {
-			status = DEAD;
-		}	
 		if (map->getBallInserted()) {
 			ballStopingSound->play();
 			map->ballInsertedAcquired();
-		}
+		}		
 		if (movingBall != NULL) {
 			textProgram.use();
 			textProgram.use();
@@ -252,10 +268,7 @@ void Scene::update(int deltaTime)
 			movingBall->update(deltaTime, map);
 			if (movingBall->isDelete()) {
 				delete(movingBall);
-				movingBall = NULL;
-				if (map->checkDeath()) {
-					status = DEAD;
-				}
+				movingBall = NULL;				
 			}
 		}
 		if (player->isBallShot()) {
@@ -270,6 +283,12 @@ void Scene::update(int deltaTime)
 			currentBall = nextBall;
 			currentBall->setPosition(glm::vec2(INITIAL_BALL_X, INITIAL_BALL_Y));
 			int color = rand() % 5;
+			int specialBall = rand() % 100;
+			specialBallDogWatch--;
+			if (specialBall < 20 && specialBallDogWatch <= 0) { //chance of special ball 20%
+				color = 7; 
+				specialBallDogWatch = 5; //Minimum 5 balls between each special ball
+			}
 			texCoords[0] = ballsCoords[color * 2]; texCoords[1] = ballsCoords[(color * 2) + 1];
 			nextBall = Ball::createBall(geom, texCoords, texProgram);
 			nextBall->setColor(color);

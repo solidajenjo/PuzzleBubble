@@ -40,9 +40,9 @@ private:
 	vector<glm::vec2> ballsCoords; //balls tex coords
 	vector<glm::vec2> exploCoords; //explosion tex coords
 	Ball *currentBall, *nextBall, *movingBall = NULL;
-	int status, score, frameCounter, musicTimer;
+	int status, score, frameCounter, musicTimer, specialBallDogWatch;
 	Text text;
-	Sound *gameLoop, *screenMovementSound, *ballStopingSound, *stageClear;
+	Sound *gameLoop, *screenMovementSound, *ballStopingSound, *stageClear, *scoreSound, *gameOverSound;
 	bool screenSoundPlaying = false;
 	int exploding = 0; //0 if no balls are exploding, 1..4 if they are, indicating the sprite
 	queue<int> ballsExploding; //x, y and color of the exploding balls while they are still exploding

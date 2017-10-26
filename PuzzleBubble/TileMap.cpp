@@ -13,6 +13,7 @@ using namespace std;
 #define OFFSET_V 6.f
 #define PRESS_START_X 190.f
 #define PRESS_START_Y -365.f
+#define SPECIAL_BALL 7
 
 TileMap *TileMap::createTileMap(const string &levelFile, const glm::vec2 &minCoords, ShaderProgram &program)
 {
@@ -109,6 +110,7 @@ bool TileMap::loadLevel(const string &levelFile)
 	fin.close();
 	logicMatrix = vector<vector<int> >(mapSize.y + lineOffset, vector<int>(mapSize.x * 2, 0));
 	logicToMapMatrix = vector<vector<int> >(mapSize.y + lineOffset, vector<int>(mapSize.x * 2, 0));
+	logicToScreen = vector<vector<glm::vec2> >(mapSize.y + lineOffset, vector<glm::vec2>(mapSize.x * 2));
 	mapToLogicMatrix = vector<int>(mapSize.x * mapSize.y * 2, 0);	
 	return true;
 }
@@ -134,15 +136,16 @@ void TileMap::prepareArrays(const glm::vec2 &minCoords, ShaderProgram &program)
 			logicToMapMatrix[j][xLog] = mapPos;
 			mapToLogicMatrix[mapPos * 2] = xLog;
 			mapToLogicMatrix[mapPos * 2 + 1] = j;
+			float offsetH = OFFSET_H;
+			float offsetV = OFFSET_V;
+			if (j % 2 == 1 - (lineOffset % 2)) offsetH -= 13.f;
+			posTile = glm::vec2(offsetH + minCoords.x + i * tileSize, pixelOffset + offsetV + minCoords.y + j * tileSize);
+			logicToScreen[j][xLog] = posTile;
 			if(tile != 0)
 			{
 				// Non-empty tile
 				if (tile != 9) ballsNumber++;
-				nTiles++;
-				float offsetH = OFFSET_H;
-				float offsetV = OFFSET_V;
-				if (j % 2 == 1 - (lineOffset % 2)) offsetH -= 13.f;
-				posTile = glm::vec2(offsetH + minCoords.x + i * tileSize, pixelOffset + offsetV + minCoords.y + j * tileSize);
+				nTiles++;				
 				texCoordTile[0] = glm::vec2(float((tile-1)%2) / tilesheetSize.x, float((tile-1)/2) / tilesheetSize.y);
 				texCoordTile[1] = texCoordTile[0] + tileTexSize;
 				//texCoordTile[0] += halfTexel;
@@ -315,7 +318,21 @@ void TileMap::checkExplosions(glm::vec2 newBallPos, int color)
 
 queue<int> TileMap::getMustExplode()
 {
-	return mustExplode;
+	queue<int> mustExplodeInScreenCoords;
+	while (!mustExplode.empty()) {
+		int x = mustExplode.front(); mustExplode.pop();
+		int y = mustExplode.front(); mustExplode.pop();
+		int color = mustExplode.front(); mustExplode.pop();
+		mustExplodeInScreenCoords.push(int(logicToScreen[y][x].x));
+		mustExplodeInScreenCoords.push(int(logicToScreen[y][x].y));
+		mustExplodeInScreenCoords.push(color);
+	}
+	return mustExplodeInScreenCoords;
+}
+
+int TileMap::howManyExplosions()
+{
+	return mustExplode.size();
 }
 
 
@@ -349,7 +366,7 @@ vector<vector<int>> TileMap::getLogicMatrix()
 	return logicMatrix;
 }
 
-int TileMap::screenToTileCellContent(glm::vec2 screenPos)
+int TileMap::screenToTileCellContent(glm::vec2 screenPos, bool special)
 {
 	float offsetH = OFFSET_H;
 	float offsetV = OFFSET_V;
@@ -359,7 +376,15 @@ int TileMap::screenToTileCellContent(glm::vec2 screenPos)
 	if (yPos >= mapSize.y) return 0;
 	if (xPos >= mapSize.x) return 0;
 	if (xPos <= 0) return 0;
- 	return map[yPos * mapSize.x + xPos];
+	int mapPos = yPos * mapSize.x + xPos;
+	if (special && map[mapPos] != 0 && map[mapPos] != 9) {
+		mustExplode.push(mapToLogicMatrix[mapPos * 2]);
+		mustExplode.push(mapToLogicMatrix[mapPos * 2 + 1]);
+		mustExplode.push(map[mapPos]);
+		map[mapPos] = 0;
+		prepareArrays(minCoordsRedraw, programRedraw);
+	}
+ 	return map[mapPos];
 }
 
 void TileMap::insertBall(glm::vec2 position, int color)
@@ -371,7 +396,7 @@ void TileMap::insertBall(glm::vec2 position, int color)
 	int xPos = (position.x - offsetH - minCoordsRedraw.x) / tileSize;
 	int mapPos = yPos * mapSize.x + xPos;
 	
-   	map[mapPos] = color + 1;
+   	if (color != SPECIAL_BALL) map[mapPos] = color + 1;
 	glm::vec2 logicPos;
 	ballInserted = true;
 	checkExplosions(glm::vec2(mapToLogicMatrix[mapPos * 2], mapToLogicMatrix[mapPos * 2 + 1]), color + 1);	

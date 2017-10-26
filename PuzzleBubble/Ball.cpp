@@ -7,7 +7,7 @@
 #define RIGHT_MARGIN 421
 #define CENTER_CORRECTION_X 13.0f
 #define CENTER_CORRECTION_Y 19.0f
-
+#define SPECIAL_BALL 7
 
 Ball *Ball::createBall(glm::vec2 geom[2], glm::vec2 texCoords[2], ShaderProgram &program)
 {
@@ -62,7 +62,7 @@ void Ball::update(int deltaTime, TileMap *tileMap)
 		float dYSpeed = -direction.y * SPEED *deltaTime;
 		position.x += dXSpeed;
 		position.y += dYSpeed;
-		tileMap->insertBall(glm::vec2(position.x, position.y), color);
+		tileMap->insertBall(glm::vec2(position.x, position.y), color);		
 		moving = false;
 		deleteBall = true;
 	}
@@ -71,7 +71,8 @@ void Ball::update(int deltaTime, TileMap *tileMap)
 	float dYSpeed = direction.y * SPEED *deltaTime;
 	position.x += dXSpeed;
 	position.y += dYSpeed;	
-	nextCellContent = tileMap->screenToTileCellContent(position);
+	if (color == SPECIAL_BALL) nextCellContent = tileMap->screenToTileCellContent(position, true);
+	else nextCellContent = tileMap->screenToTileCellContent(position, false);
 }
 
 void Ball::setPosition(glm::vec2 position)
