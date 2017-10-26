@@ -177,6 +177,7 @@ void Scene::init()
 void Scene::update(int deltaTime)
 {		
 	if (map->howManyExplosions() > 0) {
+		stillExploding = map->howManyExplosions();
 		queue<int> ballsToExplode = map->getMustExplode(); // format of queue [color -> y -> x] (x first) in screen coords
 		scoreSound->stop();
 		score += (ballsToExplode.size() / 3) * 10;
@@ -191,15 +192,39 @@ void Scene::update(int deltaTime)
 		}
 		map->resetMustExplode();
 		scoreSound->play();
-		//animacion explosion bolas		
 	}
+
+	//if the explosion animation isn't over yet (exploding != 0), we keep animating them
+
 	if (exploding) {
 		glm::vec2 texCoords[2];
 		glm::vec2 geom[2] = { glm::vec2(0.f, 0.f), glm::vec2(16.f, 16.f) };
-		while ballsExplo
-		texCoords[0] = exploCoords[(exploding - 1)*2]; texCoords[1] = exploCoords[(exploding - 1) * 2 + 1];
-		Ball expploding
+		for (int i = 0; i*3 < stillExploding; ++i) {
+			int x = ballsExploding.front();
+			ballsExploding.pop();
+			int y = ballsExploding.front();
+			ballsExploding.pop();
+			int color = ballsExploding.front();
+			ballsExploding.pop();
+			texCoords[0] = exploCoords[(exploding - 1) * 2]; texCoords[1] = exploCoords[(exploding - 1) * 2 + 1];
+			Ball explodingBall(geom, texCoords, texProgram);
+			explodingBall.setColor(color);
+			explodingBall.setPosition(glm::vec2(x, y));
+			qBallsExploding.push(explodingBall);
+			if (exploding != 4) {
+				ballsExploding.push(x);
+				ballsExploding.push(y);
+				ballsExploding.push(color);
+			}
+		}
+		if (exploding == 4) {
+			exploding = 0;
+			stillExploding = 0;
+		}
+		else exploding++;
 	}
+
+
 	skin->setPosition(glm::vec2(16.f, 8.f));
 	background->setPosition(glm::vec2(386.f, 340.f));
 	if (status == DEAD) {
@@ -261,7 +286,6 @@ void Scene::update(int deltaTime)
 		}		
 		if (movingBall != NULL) {
 			textProgram.use();
-			textProgram.use();
 			textProgram.setUniformMatrix4f("projection", projection);
 			textProgram.setUniform4f("color", 1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -269,6 +293,13 @@ void Scene::update(int deltaTime)
 			if (movingBall->isDelete()) {
 				delete(movingBall);
 				movingBall = NULL;				
+			}
+		}
+		if (exploding) {
+			while (!qBallsExploding.empty()) {
+				Ball b = qBallsExploding.front();
+				qBallsExploding.pop();
+				b.update(deltaTime, map);
 			}
 		}
 		if (player->isBallShot()) {

@@ -40,7 +40,7 @@ private:
 	vector<glm::vec2> ballsCoords; //balls tex coords
 	vector<glm::vec2> exploCoords; //explosion tex coords
 	Ball *currentBall, *nextBall, *movingBall = NULL;
-	int status, score, frameCounter, musicTimer, specialBallDogWatch;
+	int status, score, frameCounter, musicTimer, specialBallDogWatch, stillExploding;
 	Text text;
 	Sound *gameLoop, *screenMovementSound, *ballStopingSound, *stageClear, *scoreSound, *gameOverSound;
 	bool screenSoundPlaying = false;
