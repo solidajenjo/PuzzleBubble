@@ -36,13 +36,17 @@ private:
 	int updateScreenTimer;
 	glm::mat4 projection;
 	Sprite *skin, *background;
-	Texture skinTex, ballsTex, bgTex;	
+	Texture skinTex, ballsTex, bgTex, explosionTex;	
 	vector<glm::vec2> ballsCoords; //balls tex coords
+	vector<glm::vec2> exploCoords; //explosion tex coords
 	Ball *currentBall, *nextBall, *movingBall = NULL;
 	int status, score, frameCounter, musicTimer;
 	Text text;
 	Sound *gameLoop, *screenMovementSound, *ballStopingSound, *stageClear;
 	bool screenSoundPlaying = false;
+	int exploding = 0; //0 if no balls are exploding, 1..4 if they are, indicating the sprite
+	queue<int> ballsExploding; //x, y and color of the exploding balls while they are still exploding
+	queue<Ball> qBallsExploding; //to enqueue explosions and render them
 };
 
 

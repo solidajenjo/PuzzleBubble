@@ -79,6 +79,13 @@ void Scene::init()
 	ballsTex.setWrapT(GL_CLAMP_TO_EDGE);
 	ballsTex.setMinFilter(GL_NEAREST);
 	ballsTex.setMagFilter(GL_NEAREST);
+
+	//init explosions
+	explosionTex.loadFromFile("images/redexplosion.png", TEXTURE_PIXEL_FORMAT_RGBA);
+	explosionTex.setWrapS(GL_CLAMP_TO_EDGE);
+	explosionTex.setWrapT(GL_CLAMP_TO_EDGE);
+	explosionTex.setMinFilter(GL_NEAREST);
+	explosionTex.setMagFilter(GL_NEAREST);
 	
 	ballsCoords.push_back(glm::vec2(0.f, 0.f));
 	ballsCoords.push_back(glm::vec2(0.5f, 0.25f));
@@ -97,6 +104,17 @@ void Scene::init()
 	ballsCoords.push_back(glm::vec2(0.5f, 1.f));
 	ballsCoords.push_back(glm::vec2(0.5f, 0.75f));
 	ballsCoords.push_back(glm::vec2(1.f, 1.f));
+
+	//tex coords of the explosions (only one so far, adding more in case it works)
+
+	exploCoords.push_back(glm::vec2(0.f, 0.f));
+	exploCoords.push_back(glm::vec2(0.25f, 1.f));
+	exploCoords.push_back(glm::vec2(0.25f, 0.f));
+	exploCoords.push_back(glm::vec2(0.5f, 1.f));
+	exploCoords.push_back(glm::vec2(0.5f, 0.f));
+	exploCoords.push_back(glm::vec2(0.75f, 1.f));
+	exploCoords.push_back(glm::vec2(0.75f, 0.f));
+	exploCoords.push_back(glm::vec2(1.f, 1.f));
 
 	glm::vec2 geom[2] = { glm::vec2(0.f, 0.f), glm::vec2(16.f, 16.f) };
 	glm::vec2 texCoords[2];
@@ -155,9 +173,24 @@ void Scene::update(int deltaTime)
 {	
 	queue<int> ballsToExplode = map->getMustExplode(); // format x / y / color * in logic coords TODO change logic to screen
 	if (ballsToExplode.size() > 0) {
-		//animacion explosion bolas
 		score += (ballsToExplode.size() / 3) * 10;
+		while (!ballsToExplode.empty()) {
+			ballsExploding.push(ballsToExplode.front());
+			ballsToExplode.pop();
+			ballsExploding.push(ballsToExplode.front());
+			ballsToExplode.pop();
+			ballsExploding.push(ballsToExplode.front());
+			ballsToExplode.pop();
+			exploding = 1;
+		}
 		map->resetMustExplode();
+	}
+	if (exploding) {
+		glm::vec2 texCoords[2];
+		glm::vec2 geom[2] = { glm::vec2(0.f, 0.f), glm::vec2(16.f, 16.f) };
+		while ballsExplo
+		texCoords[0] = exploCoords[(exploding - 1)*2]; texCoords[1] = exploCoords[(exploding - 1) * 2 + 1];
+		Ball expploding
 	}
 	skin->setPosition(glm::vec2(16.f, 8.f));
 	background->setPosition(glm::vec2(386.f, 340.f));
