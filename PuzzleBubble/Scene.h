@@ -10,6 +10,7 @@
 #include "Ball.h"
 #include "Text.h"
 #include "Sound.h"
+#include "Explosion.h"
 
 
 // Scene contains all the entities of our game.
@@ -38,13 +39,13 @@ private:
 	Sprite *skin, *background;
 	Texture skinTex, ballsTex, bgTex, explosionTex;	
 	vector<glm::vec2> ballsCoords; //balls tex coords
-	vector<glm::vec2> exploCoords; //explosion tex coords
+	vector<Explosion> explosions; //explosions go here 
 	Ball *currentBall, *nextBall, *movingBall = NULL;
 	int status, score, frameCounter, musicTimer, specialBallDogWatch, stillExploding;
 	Text text;
 	Sound *gameLoop, *screenMovementSound, *ballStopingSound, *stageClear, *scoreSound, *gameOverSound;
 	bool screenSoundPlaying = false;
-	int exploding = 0; //0 if no balls are exploding, 1..4 if they are, indicating the sprite
+	int exploding; //0 if no balls are exploding, 1..4 if they are, indicating the sprite
 	queue<int> ballsExploding; //x, y and color of the exploding balls while they are still exploding
 	queue<Ball> qBallsExploding; //to enqueue explosions and render them
 };

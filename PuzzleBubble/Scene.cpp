@@ -81,13 +81,6 @@ void Scene::init()
 	ballsTex.setWrapT(GL_CLAMP_TO_EDGE);
 	ballsTex.setMinFilter(GL_NEAREST);
 	ballsTex.setMagFilter(GL_NEAREST);
-
-	//init explosions
-	explosionTex.loadFromFile("images/redexplosion.png", TEXTURE_PIXEL_FORMAT_RGBA);
-	explosionTex.setWrapS(GL_CLAMP_TO_EDGE);
-	explosionTex.setWrapT(GL_CLAMP_TO_EDGE);
-	explosionTex.setMinFilter(GL_NEAREST);
-	explosionTex.setMagFilter(GL_NEAREST);
 	
 	ballsCoords.push_back(glm::vec2(0.f, 0.f));
 	ballsCoords.push_back(glm::vec2(0.5f, 0.25f));
@@ -106,17 +99,6 @@ void Scene::init()
 	ballsCoords.push_back(glm::vec2(0.5f, 1.f));
 	ballsCoords.push_back(glm::vec2(0.5f, 0.75f));
 	ballsCoords.push_back(glm::vec2(1.f, 1.f));
-
-	//tex coords of the explosions (only one so far, adding more in case it works)
-
-	exploCoords.push_back(glm::vec2(0.f, 0.f));
-	exploCoords.push_back(glm::vec2(0.25f, 1.f));
-	exploCoords.push_back(glm::vec2(0.25f, 0.f));
-	exploCoords.push_back(glm::vec2(0.5f, 1.f));
-	exploCoords.push_back(glm::vec2(0.5f, 0.f));
-	exploCoords.push_back(glm::vec2(0.75f, 1.f));
-	exploCoords.push_back(glm::vec2(0.75f, 0.f));
-	exploCoords.push_back(glm::vec2(1.f, 1.f));
 
 	glm::vec2 geom[2] = { glm::vec2(0.f, 0.f), glm::vec2(16.f, 16.f) };
 	glm::vec2 texCoords[2];
@@ -172,6 +154,7 @@ void Scene::init()
 	updateScreenTimer = UPDATE_TIME;	
 	musicTimer = 0;
 	specialBallDogWatch = 5;
+	exploding = 0;
 }
 
 void Scene::update(int deltaTime)
@@ -181,49 +164,30 @@ void Scene::update(int deltaTime)
 		queue<int> ballsToExplode = map->getMustExplode(); // format of queue [color -> y -> x] (x first) in screen coords
 		scoreSound->stop();
 		score += (ballsToExplode.size() / 3) * 10;
+		explosions.clear();
 		while (!ballsToExplode.empty()) {
-			ballsExploding.push(ballsToExplode.front());
+			/*ballsExploding.push(ballsToExplode.front());
 			ballsToExplode.pop();
 			ballsExploding.push(ballsToExplode.front());
 			ballsToExplode.pop();
 			ballsExploding.push(ballsToExplode.front());
 			ballsToExplode.pop();
-			exploding = 1;
+			*/
+			int x = ballsToExplode.front();
+			ballsToExplode.pop();
+			int y = ballsToExplode.front();
+			ballsToExplode.pop();
+			int color = ballsToExplode.front();
+			ballsToExplode.pop();
+			Explosion *exp = new Explosion();
+			exp->init(texProgram, glm::vec2(x, y));
+			exp->render();
+			explosions.push_back(*exp);
 		}
+		exploding = 1;
 		map->resetMustExplode();
 		scoreSound->play();
 	}
-
-	//if the explosion animation isn't over yet (exploding != 0), we keep animating them
-
-	if (exploding) {
-		glm::vec2 texCoords[2];
-		glm::vec2 geom[2] = { glm::vec2(0.f, 0.f), glm::vec2(16.f, 16.f) };
-		for (int i = 0; i*3 < stillExploding; ++i) {
-			int x = ballsExploding.front();
-			ballsExploding.pop();
-			int y = ballsExploding.front();
-			ballsExploding.pop();
-			int color = ballsExploding.front();
-			ballsExploding.pop();
-			texCoords[0] = exploCoords[(exploding - 1) * 2]; texCoords[1] = exploCoords[(exploding - 1) * 2 + 1];
-			Ball explodingBall(geom, texCoords, texProgram);
-			explodingBall.setColor(color);
-			explodingBall.setPosition(glm::vec2(x, y));
-			qBallsExploding.push(explodingBall);
-			if (exploding != 4) {
-				ballsExploding.push(x);
-				ballsExploding.push(y);
-				ballsExploding.push(color);
-			}
-		}
-		if (exploding == 4) {
-			exploding = 0;
-			stillExploding = 0;
-		}
-		else exploding++;
-	}
-
 
 	skin->setPosition(glm::vec2(16.f, 8.f));
 	background->setPosition(glm::vec2(386.f, 340.f));
@@ -296,10 +260,12 @@ void Scene::update(int deltaTime)
 			}
 		}
 		if (exploding) {
-			while (!qBallsExploding.empty()) {
-				Ball b = qBallsExploding.front();
-				qBallsExploding.pop();
-				b.update(deltaTime, map);
+			if ((explosions[0].getState() / 4) + 1 != exploding) ++exploding;
+			for (int i = 0; i < explosions.size(); ++i) {
+				explosions[i].update(deltaTime);
+			}
+			if (exploding > 4) {
+				exploding = 0;
 			}
 		}
 		if (player->isBallShot()) {
