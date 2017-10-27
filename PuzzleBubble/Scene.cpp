@@ -181,7 +181,6 @@ void Scene::update(int deltaTime)
 			ballsToExplode.pop();
 			Explosion *exp = new Explosion();
 			exp->init(texProgram, glm::vec2(x, y));
-			exp->render();
 			explosions.push_back(*exp);
 		}
 		exploding = 1;
@@ -260,13 +259,7 @@ void Scene::update(int deltaTime)
 			}
 		}
 		if (exploding) {
-			if ((explosions[0].getState() / 4) + 1 != exploding) ++exploding;
-			for (int i = 0; i < explosions.size(); ++i) {
-				explosions[i].update(deltaTime);
-			}
-			if (exploding > 4) {
-				exploding = 0;
-			}
+			for (int i = 0; i < explosions.size(); ++i)	explosions[i].update(deltaTime);
 		}
 		if (player->isBallShot()) {
 			player->ballShotAcquired();
@@ -328,6 +321,14 @@ void Scene::render(int deltaTime)
 	player->render();			
 	currentBall->render(glm::vec2(BALL_SCALE_X, BALL_SCALE_Y), ballsTex);
 	nextBall->render(glm::vec2(BALL_SCALE_X, BALL_SCALE_Y), ballsTex);
+	if (exploding) {
+		if ((explosions[0].getState() / 4) != exploding) ++exploding;
+		if (exploding > 15) {
+			exploding = 0;
+		}
+		for (int i = 0; i < explosions.size(); ++i)	explosions[i].render();
+	}
+	
 	if (movingBall != NULL) {
 		movingBall->render(glm::vec2(BALL_SCALE_X, BALL_SCALE_Y), ballsTex);
 		textProgram.use();
