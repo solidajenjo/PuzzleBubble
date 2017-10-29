@@ -25,7 +25,7 @@ public:
 	void update(int deltaTime);
 	void render() const;
 	void free();
-
+	int getAnimation();
 	void rotate(float rotationAngle);
 	void setNumberAnimations(int nAnimations);
 	void setAnimationSpeed(int animId, int keyframesPerSec);

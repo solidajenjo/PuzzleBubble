@@ -65,16 +65,16 @@ void Player::init(const glm::ivec2 &tileMapPos, ShaderProgram &shaderProgram, gl
 void Player::update(int deltaTime, Ball *currentBall)
 {	
 	if (waitingToShoot > 0) waitingToShoot -= deltaTime;
-	if(Game::instance().getSpecialKey(GLUT_KEY_RIGHT))
+	if(Game::instance().getSpecialKey(GLUT_KEY_RIGHT) && arrowAngle < MAX_ARROW_ROT)
 	{
 		if (bub->animation() != RIGHT) bub->changeAnimation(RIGHT);
-		if (arrowAngle < MAX_ARROW_ROT) arrowAngle += ROT_SPEED * deltaTime;
+		arrowAngle += ROT_SPEED * deltaTime;
 		arrowDirection = -glm::normalize(glm::rotate(glm::mat4(1.0f), arrowAngle, glm::vec3(0.f, 0.f, 1.f)) * glm::vec4(0.f, 1.f, 0.f, 1.f));
 	}
-	else if(Game::instance().getSpecialKey(GLUT_KEY_LEFT))
+	else if(Game::instance().getSpecialKey(GLUT_KEY_LEFT) && arrowAngle > -MAX_ARROW_ROT)
 	{
 		if (bub->animation() != LEFT) bub->changeAnimation(LEFT);
-		if (arrowAngle > -MAX_ARROW_ROT) arrowAngle -= ROT_SPEED * deltaTime;
+		arrowAngle -= ROT_SPEED * deltaTime;
 		arrowDirection = -glm::normalize(glm::rotate(glm::mat4(1.0f), arrowAngle, glm::vec3(0.f, 0.f, 1.f)) * glm::vec4(0.f, 1.f, 0.f, 1.f));
 	}
 	else if (Game::instance().getKey(32) && waitingToShoot <= 0 && !blocked) {

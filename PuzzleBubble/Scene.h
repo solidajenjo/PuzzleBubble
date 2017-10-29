@@ -30,18 +30,20 @@ public:
 
 private:
 	void initShaders();
+	void initHelper();
 	TileMap *map;
 	Player *player;
-	ShaderProgram texProgram, textProgram;
+	ShaderProgram texProgram, textProgram, ballProgram;
 	float currentTime;
 	int updateScreenTimer;
 	glm::mat4 projection;
-	Sprite *skin, *background;
-	Texture skinTex, ballsTex, bgTex, explosionTex;	
+	Sprite *skin, *background, *bub2;
+	Texture skinTex, ballsTex, bgTex, explosionTex, bub2Tex;	
 	vector<glm::vec2> ballsCoords; //balls tex coords
-	vector<Explosion> explosions; //explosions go here 
+	queue<Explosion*> explosions; //explosions go here 
 	Ball *currentBall, *nextBall, *movingBall = NULL;
 	int status, score, frameCounter, musicTimer, specialBallDogWatch, stillExploding;
+	int framesBub2Anim;
 	Text text;
 	Sound *gameLoop, *screenMovementSound, *ballStopingSound, *stageClear, *scoreSound, *gameOverSound;
 	bool screenSoundPlaying = false;

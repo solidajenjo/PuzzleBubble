@@ -69,6 +69,11 @@ void Sprite::free()
 	glDeleteBuffers(1, &vbo);
 }
 
+int Sprite::getAnimation()
+{
+	return currentAnimation;
+}
+
 void Sprite::rotate(float rotationAngle)
 {
 	this->rotationAngle = rotationAngle;

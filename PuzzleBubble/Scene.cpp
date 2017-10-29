@@ -19,8 +19,12 @@
 #define BALL_SCALE_Y 1.9f
 #define INITIAL_BALL_X 317
 #define INITIAL_BALL_Y 425
+#define MID_BALL_X 290
+#define MID_BALL_Y 442
 #define NEXT_BALL_X 234
 #define NEXT_BALL_Y 450
+#define BUB2_X 235
+#define BUB2_Y 420
 //timer definitons
 #define UPDATE_TIME 15000 //20000
 //music definitions
@@ -35,6 +39,11 @@
 #define NUMBER_OF_LEVELS 5
 char* levels[] = {"levels/level01.txt", "levels/level02.txt", "levels/level03.txt",  "levels/level04.txt",  "levels/level05.txt" };
 int level = 0;
+
+enum moves {
+	STILL, LOADBALL
+};
+
 Scene::Scene()
 {
 	map = NULL;
@@ -105,13 +114,13 @@ void Scene::init()
 
 	int color = rand() % 5;
 	texCoords[0] = ballsCoords[color * 2]; texCoords[1] = ballsCoords[(color * 2) + 1];
-	currentBall = Ball::createBall(geom, texCoords, texProgram);
+	currentBall = Ball::createBall(geom, texCoords, ballProgram);
 	currentBall->setPosition(glm::vec2(INITIAL_BALL_X, INITIAL_BALL_Y));
 	currentBall->setColor(color);
 
 	color = rand() % 5;
 	texCoords[0] = ballsCoords[color * 2]; texCoords[1] = ballsCoords[(color * 2) + 1];
-	nextBall = Ball::createBall(geom, texCoords, texProgram);
+	nextBall = Ball::createBall(geom, texCoords, ballProgram);
 	nextBall->setPosition(glm::vec2(NEXT_BALL_X, NEXT_BALL_Y));
 	nextBall->setColor(color);
 
@@ -155,6 +164,9 @@ void Scene::init()
 	musicTimer = 0;
 	specialBallDogWatch = 5;
 	exploding = 0;
+
+	initHelper();
+	framesBub2Anim = 0;
 }
 
 void Scene::update(int deltaTime)
@@ -164,7 +176,6 @@ void Scene::update(int deltaTime)
 		queue<int> ballsToExplode = map->getMustExplode(); // format of queue [color -> y -> x] (x first) in screen coords
 		scoreSound->stop();
 		score += (ballsToExplode.size() / 3) * 10;
-		explosions.clear();
 		while (!ballsToExplode.empty()) {
 			/*ballsExploding.push(ballsToExplode.front());
 			ballsToExplode.pop();
@@ -181,7 +192,7 @@ void Scene::update(int deltaTime)
 			ballsToExplode.pop();
 			Explosion *exp = new Explosion();
 			exp->init(texProgram, glm::vec2(x, y), color);
-			explosions.push_back(*exp);
+			explosions.push(exp);
 		}
 		exploding = 1;
 		map->resetMustExplode();
@@ -205,6 +216,15 @@ void Scene::update(int deltaTime)
 		status = UPDATING_BOARD;		
 	}
 	if (screenSoundPlaying)	skin->setPosition(glm::vec2(16.f + 3 - (rand() % 6), 8.f));
+	if (exploding) {
+		int expSize = explosions.size();
+		for (int i = 0; i < expSize; ++i) {
+			Explosion *exp = explosions.front();
+			explosions.pop();
+			exp->update(deltaTime);
+			explosions.push(exp);
+		}
+	}
 	switch (status) {
 	case STAGE_CLEAR:
 		delete(movingBall);
@@ -229,7 +249,32 @@ void Scene::update(int deltaTime)
 			screenSoundPlaying = false;
 		}
 		break;
-	case PLAYING:
+	case PLAYING:		
+		if (framesBub2Anim > 0) {
+			framesBub2Anim--;
+			if (framesBub2Anim == 10) {
+				nextBall->setPosition(glm::vec2(MID_BALL_X, MID_BALL_Y));
+			}
+		}
+		else if (bub2->getAnimation() != STILL) {
+			currentBall = nextBall;
+			currentBall->setPosition(glm::vec2(INITIAL_BALL_X, INITIAL_BALL_Y));
+			int color = rand() % 5;
+			int specialBall = rand() % 100;
+			specialBallDogWatch--;
+			if (specialBall < 20 && specialBallDogWatch <= 0) { //chance of special ball 20%
+				color = 7;
+				specialBallDogWatch = 5; //Minimum 5 balls between each special ball
+			}
+			glm::vec2 texCoords[2];
+			glm::vec2 geom[2] = { glm::vec2(0.f, 0.f), glm::vec2(16.f, 16.f) };
+			texCoords[0] = ballsCoords[color * 2]; texCoords[1] = ballsCoords[(color * 2) + 1];
+			nextBall = Ball::createBall(geom, texCoords, ballProgram);
+			nextBall->setColor(color);
+			nextBall->setPosition(glm::vec2(NEXT_BALL_X, NEXT_BALL_Y));
+			bub2->changeAnimation(STILL);
+		}
+		bub2->update(deltaTime);
 		musicTimer -= deltaTime;
 		if (map->checkDeath()) {
 			status = DEAD;
@@ -257,32 +302,19 @@ void Scene::update(int deltaTime)
 				delete(movingBall);
 				movingBall = NULL;				
 			}
-		}
-		if (exploding) {
-			for (int i = 0; i < explosions.size(); ++i)	explosions[i].update(deltaTime);
-		}
+		}		
 		if (player->isBallShot()) {
+			bub2->changeAnimation(LOADBALL);
+			framesBub2Anim = 20;
 			player->ballShotAcquired();
 			glm::vec2 texCoords[2];
 			glm::vec2 geom[2] = { glm::vec2(0.f, 0.f), glm::vec2(16.f, 16.f) };
 			texCoords[0] = ballsCoords[currentBall->getColor() * 2]; texCoords[1] = ballsCoords[(currentBall->getColor() * 2) + 1];
-			movingBall = Ball::createBall(geom, texCoords, texProgram);;
+			movingBall = Ball::createBall(geom, texCoords, ballProgram);;
 			movingBall->setColor(currentBall->getColor());
 			movingBall->setPosition(glm::vec2(INITIAL_BALL_X, INITIAL_BALL_Y));
-			movingBall->setDirection(player->getArrowDirection());
-			currentBall = nextBall;
-			currentBall->setPosition(glm::vec2(INITIAL_BALL_X, INITIAL_BALL_Y));
-			int color = rand() % 5;
-			int specialBall = rand() % 100;
-			specialBallDogWatch--;
-			if (specialBall < 20 && specialBallDogWatch <= 0) { //chance of special ball 20%
-				color = 7; 
-				specialBallDogWatch = 5; //Minimum 5 balls between each special ball
-			}
-			texCoords[0] = ballsCoords[color * 2]; texCoords[1] = ballsCoords[(color * 2) + 1];
-			nextBall = Ball::createBall(geom, texCoords, texProgram);
-			nextBall->setColor(color);
-			nextBall->setPosition(glm::vec2(NEXT_BALL_X, NEXT_BALL_Y));
+			movingBall->setDirection(player->getArrowDirection());	
+			currentBall = NULL;
 		}
 		if (map->getBallsNumber() == 0) {
 			status = STAGE_CLEAR;
@@ -298,33 +330,58 @@ void Scene::render(int deltaTime)
 {
 	texProgram.use();
 	background->render();
-	frameCounter++;	
-	glm::mat4 modelview;	
-	if (status == PLAYING) {
-		texProgram.setUniformMatrix4f("projection", projection);
+	frameCounter++;		
+	texProgram.setUniformMatrix4f("projection", projection);
+	if (status == PLAYING) {		
 		texProgram.setUniform4f("color", 1.0f, 1.0f, 1.0f, 1.0f);
 	}
-	else if(status == DEAD) {
-		texProgram.setUniformMatrix4f("projection", projection);
+	else if(status == DEAD) {		
 		texProgram.setUniform4f("color", 0.2f, 0.2f, 0.2f, 1.0f);
 	}
-	else if (status == STAGE_CLEAR) {
-		texProgram.setUniformMatrix4f("projection", projection);
+	else if (status == STAGE_CLEAR) {		
 		texProgram.setUniform4f("color", 0.6f, 0.6f, 0.6f, 1.0f);
 	}
-	modelview = glm::mat4(1.0f);
+	glm::mat4 modelview = glm::mat4(1.0f);
 	texProgram.setUniformMatrix4f("modelview", modelview);
 	texProgram.setUniform2f("texCoordDispl", 0.f, 0.f);
 	
 	map->render();
 	skin->render();
-	player->render();			
-	currentBall->render(glm::vec2(BALL_SCALE_X, BALL_SCALE_Y), ballsTex);
+	player->render();	
+	
+	bub2->render();
+	ballProgram.use();
+	ballProgram.setUniformMatrix4f("projection", projection);
+	ballProgram.setUniformMatrix4f("modelview", modelview);
+	ballProgram.setUniform2f("texCoordDispl", 0.f, 0.f);
+	if (status == PLAYING) {
+		ballProgram.setUniform4f("color", 1.0f, 1.0f, 1.0f, 1.0f);
+	}
+	else if (status == DEAD) {
+		ballProgram.setUniform4f("color", 0.2f, 0.2f, 0.2f, 1.0f);
+	}
+	else if (status == STAGE_CLEAR) {
+		ballProgram.setUniform4f("color", 0.6f, 0.6f, 0.6f, 1.0f);
+	}
+	if (currentBall != NULL) currentBall->render(glm::vec2(BALL_SCALE_X, BALL_SCALE_Y), ballsTex);
 	nextBall->render(glm::vec2(BALL_SCALE_X, BALL_SCALE_Y), ballsTex);
 	if (exploding) {
-		if ((explosions[0].getState() / 5) != exploding) ++exploding;
-		if (exploding > 20) exploding = 0;
-		for (int i = 0; i < explosions.size(); ++i)	explosions[i].render();
+		int expSize = explosions.size();
+		for (int i = 0; i < expSize; ++i) {
+			Explosion *exp = explosions.front();
+			explosions.pop();
+			if (exp->getState() < 20) {
+				explosions.push(exp);
+				exp->render();
+			}
+			else {
+				delete exp;
+			}					
+		}
+		if (explosions.size() == 0) {
+			exploding = 0;
+		}
+
 	}
 	
 	if (movingBall != NULL) {
@@ -370,21 +427,7 @@ void Scene::initShaders()
 		cout << "" << texProgram.log() << endl << endl;
 	}
 	texProgram.bindFragmentOutput("outColor");
-	vShader.free();
-	fShader.free();
-
-	vShader.initFromFile(VERTEX_SHADER, "shaders/text.vert");
-	if (!vShader.isCompiled())
-	{
-		cout << "Vertex Shader Error" << endl;
-		cout << "" << vShader.log() << endl << endl;
-	}
-	fShader.initFromFile(FRAGMENT_SHADER, "shaders/text.frag");
-	if (!fShader.isCompiled())
-	{
-		cout << "Fragment Shader Error" << endl;
-		cout << "" << fShader.log() << endl << endl;
-	}
+	
 	textProgram.init();
 	textProgram.addShader(vShader);
 	textProgram.addShader(fShader);
@@ -395,10 +438,43 @@ void Scene::initShaders()
 		cout << "" << textProgram.log() << endl << endl;
 	}
 	textProgram.bindFragmentOutput("outColor");
+
+
+	ballProgram.init();
+	ballProgram.addShader(vShader);
+	ballProgram.addShader(fShader);
+	ballProgram.link();
+	if (!ballProgram.isLinked())
+	{
+		cout << "Shader Linking Error" << endl;
+		cout << "" << ballProgram.log() << endl << endl;
+	}
+	ballProgram.bindFragmentOutput("outColor");
+
+
 	vShader.free();
 	fShader.free();
 
 	
+}
+
+void Scene::initHelper() {
+	bub2Tex.loadFromFile("images/bub2.png", TEXTURE_PIXEL_FORMAT_RGBA);
+	bub2Tex.setWrapS(GL_CLAMP_TO_EDGE);
+	bub2Tex.setWrapT(GL_CLAMP_TO_EDGE);
+	bub2Tex.setMinFilter(GL_NEAREST);
+	bub2Tex.setMagFilter(GL_NEAREST);
+	bub2 = Sprite::createSprite(glm::vec2(70.f, 54.f), glm::vec2(0.125f, 1.f), &bub2Tex, &texProgram);
+	bub2->setNumberAnimations(2);
+	bub2->setAnimationSpeed(STILL, 2);
+	bub2->addKeyframe(STILL, glm::vec2(0.0f, 0.f));
+	bub2->addKeyframe(STILL, glm::vec2(0.298f, 0.f));
+	bub2->setAnimationSpeed(LOADBALL, 5);
+	bub2->addKeyframe(LOADBALL, glm::vec2(0.584f, 0.f));
+	bub2->addKeyframe(LOADBALL, glm::vec2(0.71f, 0.f));
+	bub2->addKeyframe(LOADBALL, glm::vec2(0.852f, 0.f));	
+	bub2->changeAnimation(STILL);
+	bub2->setPosition(glm::vec2(BUB2_X, BUB2_Y));
 }
 
 

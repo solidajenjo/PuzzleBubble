@@ -65,7 +65,6 @@ void Explosion::render() {
 	++state;
 	if (state == 100) {
 		sprite->free();
-		delete this;
 	}
 }
 

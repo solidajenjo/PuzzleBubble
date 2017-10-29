@@ -15,6 +15,6 @@ private:
 	Texture spritesheet;
 	Sprite *sprite;
 	TileMap *map;
-	int state;
+	int state;	
 };
 
