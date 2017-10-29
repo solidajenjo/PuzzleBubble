@@ -26,8 +26,8 @@ private:
 	bool blocked = false;
 	glm::ivec2 tileMapDispl, posPlayer;
 	int jumpAngle, startY, waitingToShoot = 0;
-	Texture spritesheet;
-	Sprite *sprite;
+	Texture spritesheet, bubsheet;
+	Sprite *sprite, *bub;
 	TileMap *map;
 	float arrowAngle = 0.;
 	glm::vec2 position;

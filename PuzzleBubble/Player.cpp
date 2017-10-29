@@ -12,6 +12,10 @@
 #define ROT_SPEED 0.002f
 #define WAIT_TIME 1000
 
+enum moves {
+	STILL, RIGHT, LEFT
+};
+
 void Player::init(const glm::ivec2 &tileMapPos, ShaderProgram &shaderProgram, glm::vec2 position)
 {
 	spritesheet.loadFromFile("images/arrow.png", TEXTURE_PIXEL_FORMAT_RGBA);
@@ -24,6 +28,38 @@ void Player::init(const glm::ivec2 &tileMapPos, ShaderProgram &shaderProgram, gl
 	sprite->setPosition(glm::vec2(position.x - PLAYER_CENTER_X, position.y - PLAYER_CENTER_Y));
 	this->position = position;
 	arrowDirection = -glm::normalize(glm::rotate(glm::mat4(1.0f), arrowAngle, glm::vec3(0.f, 0.f, 1.f)) * glm::vec4(0.f, 1.f, 0.f, 1.f));
+
+	//bub's sprites
+
+	bubsheet.loadFromFile("images/bub.png", TEXTURE_PIXEL_FORMAT_RGBA);
+	bubsheet.setWrapS(GL_CLAMP_TO_EDGE);
+	bubsheet.setWrapT(GL_CLAMP_TO_EDGE);
+	bubsheet.setMinFilter(GL_NEAREST);
+	bubsheet.setMagFilter(GL_NEAREST);
+	bub = Sprite::createSprite(glm::vec2(70.f, 34.f), glm::vec2(0.125f, 1.f), &bubsheet, &shaderProgram);
+	bub->setNumberAnimations(3);
+	bub->setAnimationSpeed(STILL, 1);
+	bub->addKeyframe(STILL, glm::vec2(0.f, 0.f));
+	bub->setAnimationSpeed(RIGHT, 30);
+	bub->addKeyframe(RIGHT, glm::vec2(0.f, 0.f));
+	bub->addKeyframe(RIGHT, glm::vec2(0.125f, 0.f));
+	bub->addKeyframe(RIGHT, glm::vec2(0.25f, 0.f));
+	bub->addKeyframe(RIGHT, glm::vec2(0.375f, 0.f));
+	bub->addKeyframe(RIGHT, glm::vec2(0.5f, 0.f));
+	bub->addKeyframe(RIGHT, glm::vec2(0.625f, 0.f));
+	bub->addKeyframe(RIGHT, glm::vec2(0.75f, 0.f));
+	bub->addKeyframe(RIGHT, glm::vec2(0.875f, 0.f));
+	bub->setAnimationSpeed(LEFT, 30);
+	bub->addKeyframe(LEFT, glm::vec2(0.f, 0.f));
+	bub->addKeyframe(LEFT, glm::vec2(0.875f, 0.f));
+	bub->addKeyframe(LEFT, glm::vec2(0.75f, 0.f));
+	bub->addKeyframe(LEFT, glm::vec2(0.625f, 0.f));
+	bub->addKeyframe(LEFT, glm::vec2(0.5f, 0.f));
+	bub->addKeyframe(LEFT, glm::vec2(0.375f, 0.f));
+	bub->addKeyframe(LEFT, glm::vec2(0.25f, 0.f));
+	bub->addKeyframe(LEFT, glm::vec2(0.125f, 0.f));
+	bub->changeAnimation(STILL);
+	bub->setPosition(glm::vec2(position.x + 5, position.y));
 }
 
 void Player::update(int deltaTime, Ball *currentBall)
@@ -31,11 +67,13 @@ void Player::update(int deltaTime, Ball *currentBall)
 	if (waitingToShoot > 0) waitingToShoot -= deltaTime;
 	if(Game::instance().getSpecialKey(GLUT_KEY_RIGHT))
 	{
+		if (bub->animation() != RIGHT) bub->changeAnimation(RIGHT);
 		if (arrowAngle < MAX_ARROW_ROT) arrowAngle += ROT_SPEED * deltaTime;
 		arrowDirection = -glm::normalize(glm::rotate(glm::mat4(1.0f), arrowAngle, glm::vec3(0.f, 0.f, 1.f)) * glm::vec4(0.f, 1.f, 0.f, 1.f));
 	}
 	else if(Game::instance().getSpecialKey(GLUT_KEY_LEFT))
 	{
+		if (bub->animation() != LEFT) bub->changeAnimation(LEFT);
 		if (arrowAngle > -MAX_ARROW_ROT) arrowAngle -= ROT_SPEED * deltaTime;
 		arrowDirection = -glm::normalize(glm::rotate(glm::mat4(1.0f), arrowAngle, glm::vec3(0.f, 0.f, 1.f)) * glm::vec4(0.f, 1.f, 0.f, 1.f));
 	}
@@ -44,6 +82,8 @@ void Player::update(int deltaTime, Ball *currentBall)
 		ballShot = true;
 		currentBall->setDirection(glm::vec2(arrowDirection));
 	}
+	else bub->changeAnimation(STILL);
+	bub->update(deltaTime);
 	sprite->rotate(arrowAngle);
 	sprite->setPosition(position);
 }
@@ -76,6 +116,7 @@ void Player::setBlocked(bool status)
 void Player::render()
 {
 	sprite->render();
+	bub->render();
 }
 
 bool Player::anyKeyPressed()
