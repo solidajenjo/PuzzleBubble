@@ -5,7 +5,7 @@
 class Explosion
 {
 public:
-	void init(ShaderProgram &shaderProgram, glm::vec2 &position);
+	void init(ShaderProgram &shaderProgram, glm::vec2 &position, int color);
 	void update(int deltaTime);
 	void render();
 	int getState();

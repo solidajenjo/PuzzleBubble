@@ -45,7 +45,7 @@ private:
 	Text text;
 	Sound *gameLoop, *screenMovementSound, *ballStopingSound, *stageClear, *scoreSound, *gameOverSound;
 	bool screenSoundPlaying = false;
-	int exploding; //0 if no balls are exploding, 1..4 if they are, indicating the sprite
+	int exploding; //0 if no balls are exploding, 1..5 if they are, indicating the sprite
 	queue<int> ballsExploding; //x, y and color of the exploding balls while they are still exploding
 	queue<Ball> qBallsExploding; //to enqueue explosions and render them
 };

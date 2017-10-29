@@ -180,7 +180,7 @@ void Scene::update(int deltaTime)
 			int color = ballsToExplode.front();
 			ballsToExplode.pop();
 			Explosion *exp = new Explosion();
-			exp->init(texProgram, glm::vec2(x, y));
+			exp->init(texProgram, glm::vec2(x, y), color);
 			explosions.push_back(*exp);
 		}
 		exploding = 1;
@@ -322,10 +322,8 @@ void Scene::render(int deltaTime)
 	currentBall->render(glm::vec2(BALL_SCALE_X, BALL_SCALE_Y), ballsTex);
 	nextBall->render(glm::vec2(BALL_SCALE_X, BALL_SCALE_Y), ballsTex);
 	if (exploding) {
-		if ((explosions[0].getState() / 4) != exploding) ++exploding;
-		if (exploding > 15) {
-			exploding = 0;
-		}
+		if ((explosions[0].getState() / 5) != exploding) ++exploding;
+		if (exploding > 20) exploding = 0;
 		for (int i = 0; i < explosions.size(); ++i)	explosions[i].render();
 	}
 	
