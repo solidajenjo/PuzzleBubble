@@ -400,7 +400,7 @@ void TileMap::insertBall(glm::vec2 position, int color)
 	ballInserted = true;
 	checkExplosions(glm::vec2(mapToLogicMatrix[mapPos * 2], mapToLogicMatrix[mapPos * 2 + 1]), color + 1);	
 	if (mustExplode.empty()) {
-		posInserted = position;
+		posInserted = logicToScreen[mapToLogicMatrix[mapPos * 2 + 1]][mapToLogicMatrix[mapPos * 2]];
 		colorInserted = color;
 	}
 	else colorInserted = 7;

@@ -2,7 +2,7 @@
 #include <GL/gl.h>
 #include "Ball.h"
 
-#define SPEED 1.4f
+#define SPEED 1.3f
 #define LEFT_MARGIN 213
 #define RIGHT_MARGIN 421
 #define CENTER_CORRECTION_X 13.0f
