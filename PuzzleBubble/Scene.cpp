@@ -177,13 +177,6 @@ void Scene::update(int deltaTime)
 		scoreSound->stop();
 		score += (ballsToExplode.size() / 3) * 10;
 		while (!ballsToExplode.empty()) {
-			/*ballsExploding.push(ballsToExplode.front());
-			ballsToExplode.pop();
-			ballsExploding.push(ballsToExplode.front());
-			ballsToExplode.pop();
-			ballsExploding.push(ballsToExplode.front());
-			ballsToExplode.pop();
-			*/
 			int x = ballsToExplode.front();
 			ballsToExplode.pop();
 			int y = ballsToExplode.front();
@@ -291,7 +284,14 @@ void Scene::update(int deltaTime)
 		if (map->getBallInserted()) {
 			ballStopingSound->play();
 			map->ballInsertedAcquired();
+			if (map->getColorInserted() != 7) {
+				glowing = new Glow();
+				glowing->init(texProgram, map->getPosInserted(), map->getColorInserted());
+			}
 		}		
+
+		if (glowing != NULL) glowing->update(deltaTime);
+
 		if (movingBall != NULL) {
 			textProgram.use();
 			textProgram.setUniformMatrix4f("projection", projection);
@@ -389,6 +389,10 @@ void Scene::render(int deltaTime)
 		textProgram.use();
 		textProgram.setUniformMatrix4f("projection", projection);
 		textProgram.setUniform4f("color", 1.0f, 1.0f, 1.0f, 1.0f);	
+	}
+	if (glowing != NULL) {
+		glowing->render();
+		if (glowing->getState() == 10) glowing = NULL;
 	}
 	text.render("LEVEL "+to_string(level)+"             SCORE = " + to_string(score), glm::vec2(210, 24), 12, glm::vec4(0.02f, 0.96f, 0.15f, 1.f));
 	if (status == DEAD && (frameCounter % 100) < 80) {

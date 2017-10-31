@@ -42,6 +42,8 @@ public:
 	void ballInsertedAcquired();
 	bool getBallInserted();
 	void initPress();
+	glm::vec2 getPosInserted();
+	int getColorInserted();
 private:
 	bool loadLevel(const string &levelFile);
 	void prepareArrays(const glm::vec2 &minCoords, ShaderProgram &program);
@@ -69,6 +71,8 @@ private:
 	bool ballInserted = false;
 	Texture pressTex;
 	Sprite *press;
+	glm::vec2 posInserted;
+	int colorInserted;
 };
 
 

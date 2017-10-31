@@ -11,6 +11,7 @@
 #include "Text.h"
 #include "Sound.h"
 #include "Explosion.h"
+#include "Glow.h"
 
 
 // Scene contains all the entities of our game.
@@ -38,11 +39,12 @@ private:
 	int updateScreenTimer;
 	glm::mat4 projection;
 	Sprite *skin, *background, *bub2;
-	Texture skinTex, ballsTex, bgTex, explosionTex, bub2Tex;	
+	Texture skinTex, ballsTex, bgTex, explosionTex, bub2Tex, glowTex;	
 	vector<glm::vec2> ballsCoords; //balls tex coords
 	queue<Explosion*> explosions; //explosions go here 
 	Ball *currentBall, *nextBall, *movingBall = NULL;
 	int status, score, frameCounter, musicTimer, specialBallDogWatch, stillExploding;
+	Glow *glowing;
 	int framesBub2Anim;
 	Text text;
 	Sound *gameLoop, *screenMovementSound, *ballStopingSound, *stageClear, *scoreSound, *gameOverSound;
