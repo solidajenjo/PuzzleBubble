@@ -4,6 +4,7 @@
 
 #include "Scene.h"
 #include "Menu.h"
+#include "Instructions.h"
 
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 480
@@ -42,11 +43,13 @@ public:
 	bool getKey(int key) const;
 	bool getSpecialKey(int key) const;
 	void loadGame();
+	void loadInstructions(int deltaTime);
 	void setStatus(int status);
 private:
 	bool bPlay;                       // Continue to play game?
 	Menu menu;
 	Scene scene;
+	Instructions instructions;
 	int status = 0;
 	bool keys[256], specialKeys[256]; // Store key states so that 
 	                                  // we can have access at any time

@@ -85,6 +85,14 @@ void Menu::update(int deltaTime)
 		Game::instance().loadGame();		
 		Game::instance().setStatus(1);
 	}
+	if (Game::instance().getKey(13) && menuPos == 1) {
+		menuLoop->stop();
+		delete menuSelector;
+		delete menuBackground;
+		delete menuText;
+		Game::instance().loadInstructions(deltaTime);
+		Game::instance().setStatus(2);
+	}
 	if (Game::instance().getSpecialKey(101) && menuPos > 0 && keyTimer <= 0) {
 		menuPos--;
 		keyTimer = TIME_BETWEEN_KEYS;

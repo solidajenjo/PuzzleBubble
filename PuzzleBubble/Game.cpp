@@ -19,6 +19,9 @@ bool Game::update(int deltaTime)
 	case 1:
 		scene.update(deltaTime);
 		break;
+	case 2:
+		instructions.update(deltaTime);
+		break;
 	}	
 	
 	return bPlay;
@@ -33,6 +36,9 @@ void Game::render(int deltaTime)
 		break;
 	case 1:
 		scene.render(deltaTime);
+		break;
+	case 2:
+		instructions.render(deltaTime);
 		break;
 	}
 }
@@ -84,6 +90,10 @@ bool Game::getSpecialKey(int key) const
 void Game::loadGame()
 {
 	scene.init();
+}
+
+void Game::loadInstructions(int deltaTime) {
+	instructions.init(deltaTime);
 }
 
 void Game::setStatus(int status)
