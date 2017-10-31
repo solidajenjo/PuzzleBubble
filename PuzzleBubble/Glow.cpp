@@ -16,11 +16,11 @@ Glow::~Glow()
 void Glow::init(ShaderProgram &shaderProgram, glm::vec2 &position, int color) {
 	state = 0;
 	spritesheet.loadFromFile("images/brillos.png", TEXTURE_PIXEL_FORMAT_RGBA);
-	spritesheet.setWrapS(GL_REPEAT);
-	spritesheet.setWrapT(GL_REPEAT);
-	spritesheet.setMinFilter(GL_LINEAR_MIPMAP_LINEAR);
-	spritesheet.setMagFilter(GL_LINEAR_MIPMAP_LINEAR);
-	sprite = Sprite::createSprite(glm::vec2(30.f, 30.f), glm::vec2(0.2f, 0.2f), &spritesheet, &shaderProgram);
+	spritesheet.setWrapS(GL_CLAMP_TO_EDGE);
+	spritesheet.setWrapT(GL_CLAMP_TO_EDGE);
+	spritesheet.setMinFilter(GL_NEAREST);
+	spritesheet.setMagFilter(GL_NEAREST);
+	sprite = Sprite::createSprite(glm::vec2(26.f, 26.f), glm::vec2(0.2f, 0.2f), &spritesheet, &shaderProgram);
 	sprite->setNumberAnimations(5);
 	sprite->setAnimationSpeed(BLUE, 30);
 	sprite->addKeyframe(BLUE, glm::vec2(0.f, 0.f));
