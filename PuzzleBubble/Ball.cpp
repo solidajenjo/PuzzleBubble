@@ -62,8 +62,8 @@ void Ball::update(int deltaTime, TileMap *tileMap)
 		float dYSpeed = -direction.y * SPEED *deltaTime;
 		position.x += dXSpeed;
 		position.y += dYSpeed;
-		tileMap->insertBall(glm::vec2(position.x, position.y), color);		
 		moving = false;
+		tileMap->insertBall(glm::vec2(position.x, position.y), color);				
 		deleteBall = true;
 	}
  	if (position.x > RIGHT_MARGIN || position.x < LEFT_MARGIN) direction.x = -direction.x;	
@@ -71,7 +71,9 @@ void Ball::update(int deltaTime, TileMap *tileMap)
 	float dYSpeed = direction.y * SPEED *deltaTime;
 	position.x += dXSpeed;
 	position.y += dYSpeed;	
-	if (color == SPECIAL_BALL) nextCellContent = tileMap->screenToTileCellContent(position, true);
+	if (color == SPECIAL_BALL) {
+		nextCellContent = tileMap->screenToTileCellContent(position, true);
+	}
 	else nextCellContent = tileMap->screenToTileCellContent(position, false);
 }
 

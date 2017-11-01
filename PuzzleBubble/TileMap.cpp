@@ -351,6 +351,16 @@ bool TileMap::getBallInserted()
 	return ballInserted;
 }
 
+bool TileMap::isUpdating()
+{
+	return updating;
+}
+
+void TileMap::setIsUpdating(bool updating)
+{
+	this->updating = updating;
+}
+
 void TileMap::initPress()
 {
 	pressTex.loadFromFile("images/press.png", TEXTURE_PIXEL_FORMAT_RGBA);
@@ -418,19 +428,19 @@ int TileMap::getColorInserted() {
 bool TileMap::update(int deltaTime)
 {
 	pixelOffset += PIXEL_MOVE_PER_FRAME * deltaTime;	
-	bool result = false;
+	updating = false;
 	if (pixelOffset >= tileSize) {
 		lineOffset += 1;
 		pixelOffset = 0;
 		for (int i = (mapSize.x * mapSize.y) - 1; i >= mapSize.x; --i) {
 			map[i] = map[i - mapSize.x];
 		}
-		result = true;
+		updating = true;
 	}
 	this->prepareArrays(minCoordsRedraw, programRedraw);
 	press->setPosition(glm::vec2(PRESS_START_X, PRESS_START_Y + pixelOffset + lineOffset * tileSize));
 	this->render();
-	return result;
+	return updating;
 }
 
 bool TileMap::checkDeath()

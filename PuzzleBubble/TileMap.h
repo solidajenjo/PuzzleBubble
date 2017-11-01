@@ -41,6 +41,8 @@ public:
 	void resetMustExplode();
 	void ballInsertedAcquired();
 	bool getBallInserted();
+	bool isUpdating();
+	void setIsUpdating(bool updating);
 	void initPress();
 	glm::vec2 getPosInserted();
 	int getColorInserted();
@@ -69,6 +71,7 @@ private:
 	queue<int> mustExplode;
 	bool fillLogToMap = true;
 	bool ballInserted = false;
+	bool updating = false;
 	Texture pressTex;
 	Sprite *press;
 	glm::vec2 posInserted;

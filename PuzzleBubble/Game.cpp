@@ -17,7 +17,7 @@ bool Game::update(int deltaTime)
 		menu.update(deltaTime);
 		break;
 	case 1:
-		scene.update(deltaTime);
+		scene->update(deltaTime);
 		break;
 	case 2:
 		instructions.update(deltaTime);
@@ -35,7 +35,7 @@ void Game::render(int deltaTime)
 		menu.render(deltaTime);
 		break;
 	case 1:
-		scene.render(deltaTime);
+		scene->render(deltaTime);
 		break;
 	case 2:
 		instructions.render(deltaTime);
@@ -87,10 +87,6 @@ bool Game::getSpecialKey(int key) const
 	return specialKeys[key];
 }
 
-void Game::loadGame()
-{
-	scene.init();
-}
 
 void Game::loadInstructions(int deltaTime) {
 	instructions.init(deltaTime);
@@ -99,7 +95,15 @@ void Game::loadInstructions(int deltaTime) {
 void Game::setStatus(int status)
 {
 	this->status = status;
-	if (status == 0) menu.init();
+	if (status == 0) {
+		menu.init();
+		delete scene;
+	}
+	if (status == 1) {
+		scene = new Scene();
+		scene->init();
+	}
+	
 }
 
 

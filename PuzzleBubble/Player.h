@@ -11,13 +11,12 @@ class Player
 {
 
 public:
-	void init(const glm::ivec2 &tileMapPos, ShaderProgram &shaderProgram, glm::vec2 position);
+	void init(TileMap *map, ShaderProgram &shaderProgram, glm::vec2 position);
 	void update(int deltaTime, Ball *currentBall);
 	glm::vec2 getArrowDirection();
 	bool isBallShot();
 	void ballShotAcquired();
 	void setWaitingTime(int time);
-	void setBlocked(bool status);
 	void render();
 	bool anyKeyPressed();
 	

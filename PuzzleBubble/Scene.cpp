@@ -25,8 +25,12 @@
 #define NEXT_BALL_Y 450
 #define BUB2_X 235
 #define BUB2_Y 420
+#define WIN_X 50
+#define WIN_Y 100
+#define WIN_DISP 420
 //timer definitons
-#define UPDATE_TIME 15000 //20000
+#define UPDATE_TIME 15000 //15000 acceptable
+#define WAITING_TIME 5500
 //music definitions
 #define MUSIC_GAP 24000 // too many calls to sound->play()
 #define PRE_MOVEMEMENT_SOUND 2000
@@ -36,18 +40,21 @@
 #define DEAD 3
 #define STAGE_CLEAR 4
 #define MENU 5
+#define WIN 6
 #define NUMBER_OF_LEVELS 5
 char* levels[] = {"levels/level01.txt", "levels/level02.txt", "levels/level03.txt",  "levels/level04.txt",  "levels/level05.txt" };
 int level = 0;
 
-enum moves {
+enum movesHelper {
 	STILL, LOADBALL
+};
+
+enum movesWinning {
+	WINNING
 };
 
 Scene::Scene()
 {
-	map = NULL;
-	player = NULL;
 }
 
 Scene::~Scene()
@@ -140,7 +147,7 @@ void Scene::init()
 	bgTex.setMagFilter(GL_LINEAR_MIPMAP_LINEAR);
 	background = Sprite::createSprite(glm::ivec2(800.f, 800.f), glm::vec2(40.0f, 40.0f), &bgTex, &texProgram);
 	background->setSpriteCenter(glm::vec2(200.f, 313.f));
-
+	level = 0;
 	map = TileMap::createTileMap(levels[level++], glm::vec2(SCREEN_X, SCREEN_Y), texProgram);
 	//init text
 	if (!text.init("fonts/Retro Computer_DEMO.ttf"))
@@ -154,7 +161,7 @@ void Scene::init()
 	gameOverSound = new Sound("sounds/gameOver.wav");
 	//init player
 	player = new Player();
-	player->init(glm::ivec2(SCREEN_X, SCREEN_Y), texProgram, glm::vec2(PLAYER_POS_X, PLAYER_POS_Y));
+	player->init(map, texProgram, glm::vec2(PLAYER_POS_X, PLAYER_POS_Y));
 	projection = glm::ortho(0.f, float(SCREEN_WIDTH - 1), float(SCREEN_HEIGHT - 1), 0.f);
 	//init game parameters
 	currentTime = 0.0f;
@@ -164,38 +171,18 @@ void Scene::init()
 	musicTimer = 0;
 	specialBallDogWatch = 5;
 	exploding = 0;
-
-	initHelper();
+	glowing = NULL;
+	initAnims();
 	framesBub2Anim = 0;
 }
 
 void Scene::update(int deltaTime)
-{		
-	if (map->howManyExplosions() > 0) {
-		stillExploding = map->howManyExplosions();
-		queue<int> ballsToExplode = map->getMustExplode(); // format of queue [color -> y -> x] (x first) in screen coords
-		scoreSound->stop();
-		score += (ballsToExplode.size() / 3) * 10;
-		while (!ballsToExplode.empty()) {
-			int x = ballsToExplode.front();
-			ballsToExplode.pop();
-			int y = ballsToExplode.front();
-			ballsToExplode.pop();
-			int color = ballsToExplode.front();
-			ballsToExplode.pop();
-			Explosion *exp = new Explosion();
-			exp->init(texProgram, glm::vec2(x, y), color);
-			explosions.push(exp);
-		}
-		exploding = 1;
-		map->resetMustExplode();
-		scoreSound->play();
-	}
-
+{			
+	if (!waitTimer.isFinished()) waitTimer.update(deltaTime);
 	skin->setPosition(glm::vec2(16.f, 8.f));
 	background->setPosition(glm::vec2(386.f, 340.f));
 	if (status == DEAD) {
-		if (player->anyKeyPressed()) Game::instance().setStatus(0);
+		if (waitTimer.isFinished() && player->anyKeyPressed()) Game::instance().setStatus(0);
 		return;
 	}
 	currentTime += deltaTime;
@@ -204,9 +191,6 @@ void Scene::update(int deltaTime)
 	if (updateScreenTimer - PRE_MOVEMEMENT_SOUND < 0 && status == PLAYING && !screenSoundPlaying) {
 		screenMovementSound->play();
 		screenSoundPlaying = true;
-	}
-	if (updateScreenTimer < 0 && status == PLAYING) {		
-		status = UPDATING_BOARD;		
 	}
 	if (screenSoundPlaying)	skin->setPosition(glm::vec2(16.f + 3 - (rand() % 6), 8.f));
 	if (exploding) {
@@ -219,6 +203,10 @@ void Scene::update(int deltaTime)
 		}
 	}
 	switch (status) {
+	case WIN:
+		winnerBub->update(deltaTime);
+		if (waitTimer.isFinished() && player->anyKeyPressed()) Game::instance().setStatus(0);
+		break;
 	case STAGE_CLEAR:
 		delete(movingBall);
 		movingBall = NULL;
@@ -226,20 +214,25 @@ void Scene::update(int deltaTime)
 		screenSoundPlaying = false;
 		if (updateScreenTimer < 0) {
 			updateScreenTimer = 0;
-			if (player->anyKeyPressed() && level < NUMBER_OF_LEVELS) {
+			if (waitTimer.isFinished() && player->anyKeyPressed() && level < NUMBER_OF_LEVELS) {
 				map = TileMap::createTileMap(levels[level++], glm::vec2(SCREEN_X, SCREEN_Y), texProgram);
 				status = PLAYING;
 				updateScreenTimer = UPDATE_TIME;
 				musicTimer = 0;
 			}
+			else if (level == 5) {
+				status = WIN;
+				waitTimer = WaitTimer(WAITING_TIME);
+			}
 		}
 		break;
 	case UPDATING_BOARD:		
-		if (map->update(deltaTime)) {			
+		if (glowing == NULL && map->update(deltaTime)) {			
 			status = PLAYING;			
 			updateScreenTimer = UPDATE_TIME;
 			screenMovementSound->stop();
 			screenSoundPlaying = false;
+			map->setIsUpdating(false);
 		}
 		break;
 	case PLAYING:		
@@ -267,7 +260,7 @@ void Scene::update(int deltaTime)
 			nextBall->setPosition(glm::vec2(NEXT_BALL_X, NEXT_BALL_Y));
 			bub2->changeAnimation(STILL);
 		}
-		bub2->update(deltaTime);
+		bub2->update(deltaTime);		
 		musicTimer -= deltaTime;
 		if (map->checkDeath()) {
 			status = DEAD;
@@ -275,32 +268,52 @@ void Scene::update(int deltaTime)
 			movingBall = NULL;
 			gameLoop->stop();
 			gameOverSound->play();
+			waitTimer = WaitTimer(WAITING_TIME);
 			return;
 		}
 		if (musicTimer <= 0) {
 			gameLoop->play();
 			musicTimer = MUSIC_GAP;
-		}
-		if (map->getBallInserted()) {
-			ballStopingSound->play();
-			map->ballInsertedAcquired();
-			if (map->getColorInserted() != 7) {
-				glowing = new Glow();
-				glowing->init(texProgram, map->getPosInserted(), map->getColorInserted());
-			}
-		}		
+		}				
 
-		if (glowing != NULL) glowing->update(deltaTime);
+		if (glowing != NULL) {
+			glowing->update(deltaTime);			
+		}
 
 		if (movingBall != NULL) {
-			textProgram.use();
-			textProgram.setUniformMatrix4f("projection", projection);
-			textProgram.setUniform4f("color", 1.0f, 1.0f, 1.0f, 1.0f);
-
 			movingBall->update(deltaTime, map);
 			if (movingBall->isDelete()) {
 				delete(movingBall);
-				movingBall = NULL;				
+				movingBall = NULL;	
+				//post ball insertion effects // avoid overlap effects and screen movement
+				if (map->getBallInserted()) {
+					ballStopingSound->play();
+					map->ballInsertedAcquired();
+					if (map->getColorInserted() != 7) {
+						glowing = new Glow();
+						glowing->init(texProgram, map->getPosInserted(), map->getColorInserted());
+					}
+				}
+				if (map->howManyExplosions() > 0) {
+					stillExploding = map->howManyExplosions();
+					queue<int> ballsToExplode = map->getMustExplode(); // format of queue [color -> y -> x] (x first) in screen coords
+					scoreSound->stop();
+					score += (ballsToExplode.size() / 3) * 10;
+					while (!ballsToExplode.empty()) {
+						int x = ballsToExplode.front();
+						ballsToExplode.pop();
+						int y = ballsToExplode.front();
+						ballsToExplode.pop();
+						int color = ballsToExplode.front();
+						ballsToExplode.pop();
+						Explosion *exp = new Explosion();
+						exp->init(texProgram, glm::vec2(x, y), color);
+						explosions.push(exp);
+					}
+					exploding = 1;
+					map->resetMustExplode();
+					scoreSound->play();
+				}
 			}
 		}		
 		if (player->isBallShot()) {
@@ -318,18 +331,23 @@ void Scene::update(int deltaTime)
 		}
 		if (map->getBallsNumber() == 0) {
 			status = STAGE_CLEAR;
+			waitTimer = WaitTimer(WAITING_TIME);
 			gameLoop->stop();
 			stageClear->play();
 			updateScreenTimer = UPDATE_TIME / 20;
 		}
+		if (updateScreenTimer < 0 && status == PLAYING && explosions.empty() &&
+			glowing == NULL && (movingBall == NULL || !movingBall->isMoving())) {
+			status = UPDATING_BOARD;
+			map->setIsUpdating(true);
+		}
 		break;
-	}
+	}	
 }
 
 void Scene::render(int deltaTime)
 {
-	texProgram.use();
-	background->render();
+	texProgram.use();	
 	frameCounter++;		
 	texProgram.setUniformMatrix4f("projection", projection);
 	if (status == PLAYING) {		
@@ -341,6 +359,10 @@ void Scene::render(int deltaTime)
 	else if (status == STAGE_CLEAR) {		
 		texProgram.setUniform4f("color", 0.6f, 0.6f, 0.6f, 1.0f);
 	}
+	else if (status == WIN) {
+		texProgram.setUniform4f("color", 0.f, 0.f, 0.f, 1.0f);
+	}
+	background->render();
 	glm::mat4 modelview = glm::mat4(1.0f);
 	texProgram.setUniformMatrix4f("modelview", modelview);
 	texProgram.setUniform2f("texCoordDispl", 0.f, 0.f);
@@ -350,6 +372,13 @@ void Scene::render(int deltaTime)
 	player->render();	
 	
 	bub2->render();
+	if (status == WIN) {
+		texProgram.setUniform4f("color", 1.f, 1.f, 1.f, 1.0f);
+		winnerBub->setPosition(glm::vec2(WIN_X, WIN_Y));
+		winnerBub->render();
+		winnerBub->setPosition(glm::vec2(WIN_X + WIN_DISP, WIN_Y));
+		winnerBub->render();
+	}
 	ballProgram.use();
 	ballProgram.setUniformMatrix4f("projection", projection);
 	ballProgram.setUniformMatrix4f("modelview", modelview);
@@ -362,6 +391,9 @@ void Scene::render(int deltaTime)
 	}
 	else if (status == STAGE_CLEAR) {
 		ballProgram.setUniform4f("color", 0.6f, 0.6f, 0.6f, 1.0f);
+	}
+	else if (status == WIN) {
+		ballProgram.setUniform4f("color", 0.f, 0.f, 0.f, 1.0f);
 	}
 	if (currentBall != NULL) currentBall->render(glm::vec2(BALL_SCALE_X, BALL_SCALE_Y), ballsTex);
 	nextBall->render(glm::vec2(BALL_SCALE_X, BALL_SCALE_Y), ballsTex);
@@ -392,16 +424,27 @@ void Scene::render(int deltaTime)
 	}
 	if (glowing != NULL) {
 		glowing->render();
-		if (glowing->getState() == 10) glowing = NULL;
+		if (glowing->getState() == 10) {
+			delete glowing;
+			glowing = NULL;
+		}
 	}
 	text.render("LEVEL "+to_string(level)+"             SCORE = " + to_string(score), glm::vec2(210, 24), 12, glm::vec4(0.02f, 0.96f, 0.15f, 1.f));
 	if (status == DEAD && (frameCounter % 100) < 80) {
 		text.render("GAME OVER", glm::vec2(50, 224), 80, glm::vec4(0.02f, 0.96f, 0.15f, 1.f));
-		text.render("Press any key to continue.", glm::vec2(130, 324), 20, glm::vec4(0.02f, 0.96f, 0.15f, 1.f));
+		if (waitTimer.isFinished())
+			text.render("Press any key to continue.", glm::vec2(130, 324), 20, glm::vec4(0.02f, 0.96f, 0.15f, 1.f));
 	}	
-	if (status == STAGE_CLEAR && (frameCounter % 100) < 80) {
+	if (level != 5 && status == STAGE_CLEAR && (frameCounter % 100) < 80) {
 		text.render("STAGE CLEARED", glm::vec2(60, 224), 50, glm::vec4(0.02f, 0.96f, 0.15f, 1.f));
-		text.render("Press any key to continue.", glm::vec2(130, 324), 20, glm::vec4(0.02f, 0.96f, 0.15f, 1.f));
+		if (waitTimer.isFinished())
+			text.render("Press any key to continue.", glm::vec2(130, 324), 20, glm::vec4(0.02f, 0.96f, 0.15f, 1.f));
+	}	
+	if (status == WIN && (frameCounter % 100) < 80) {
+		text.render("CONGRATULATIONS", glm::vec2(190, 180), 20, glm::vec4(0.02f, 0.96f, 0.15f, 1.f));
+		text.render("YOU WIN!!!", glm::vec2(246, 214), 20, glm::vec4(0.02f, 0.96f, 0.15f, 1.f));
+		if (waitTimer.isFinished())
+			text.render("Press any key to continue.", glm::vec2(130, 324), 20, glm::vec4(0.02f, 0.96f, 0.15f, 1.f));
 	}
 }
 
@@ -462,7 +505,7 @@ void Scene::initShaders()
 	
 }
 
-void Scene::initHelper() {
+void Scene::initAnims() {
 	bub2Tex.loadFromFile("images/bub2.png", TEXTURE_PIXEL_FORMAT_RGBA);
 	bub2Tex.setWrapS(GL_CLAMP_TO_EDGE);
 	bub2Tex.setWrapT(GL_CLAMP_TO_EDGE);
@@ -479,6 +522,48 @@ void Scene::initHelper() {
 	bub2->addKeyframe(LOADBALL, glm::vec2(0.852f, 0.f));	
 	bub2->changeAnimation(STILL);
 	bub2->setPosition(glm::vec2(BUB2_X, BUB2_Y));
+
+	/////////////////////////////////////////////
+
+	winTex.loadFromFile("images/winning.png", TEXTURE_PIXEL_FORMAT_RGBA);
+	winTex.setWrapS(GL_CLAMP_TO_EDGE);
+	winTex.setWrapT(GL_CLAMP_TO_EDGE);
+	winTex.setMinFilter(GL_NEAREST);
+	winTex.setMagFilter(GL_NEAREST);
+	winnerBub = Sprite::createSprite(glm::vec2(120.f, 184.f), glm::vec2(1.f / 18.f, 1.f), &winTex, &texProgram);
+	winnerBub->setNumberAnimations(1);
+	winnerBub->setAnimationSpeed(WINNING, 10);
+	winnerBub->addKeyframe(WINNING, glm::vec2(0.0f, 0.f));
+	winnerBub->addKeyframe(WINNING, glm::vec2(0.056f, 0.f));
+	winnerBub->addKeyframe(WINNING, glm::vec2(0.111f, 0.f));
+	winnerBub->addKeyframe(WINNING, glm::vec2(0.166f, 0.f));
+	winnerBub->addKeyframe(WINNING, glm::vec2(0.222f, 0.f));
+	winnerBub->addKeyframe(WINNING, glm::vec2(0.277f, 0.f));
+	winnerBub->addKeyframe(WINNING, glm::vec2(0.332f, 0.f));
+	winnerBub->addKeyframe(WINNING, glm::vec2(0.387f, 0.f));
+	winnerBub->addKeyframe(WINNING, glm::vec2(0.442f, 0.f));
+	float disp = 0.497f;
+	winnerBub->addKeyframe(WINNING, glm::vec2(disp + 0.0f, 0.f));
+	winnerBub->addKeyframe(WINNING, glm::vec2(disp + 0.056f, 0.f));
+	winnerBub->addKeyframe(WINNING, glm::vec2(disp + 0.111f, 0.f));
+	winnerBub->addKeyframe(WINNING, glm::vec2(disp + 0.166f, 0.f));
+	winnerBub->addKeyframe(WINNING, glm::vec2(disp + 0.222f, 0.f));
+	winnerBub->addKeyframe(WINNING, glm::vec2(disp + 0.277f, 0.1f));
+	winnerBub->addKeyframe(WINNING, glm::vec2(disp + 0.332f, 0.1f));
+	winnerBub->addKeyframe(WINNING, glm::vec2(disp + 0.387f, 0.f));
+	winnerBub->addKeyframe(WINNING, glm::vec2(disp + 0.442f, 0.f));
+	winnerBub->addKeyframe(WINNING, glm::vec2(disp + 0.442f, 0.f));
+	winnerBub->addKeyframe(WINNING, glm::vec2(disp + 0.442f, 0.f));
+	winnerBub->addKeyframe(WINNING, glm::vec2(disp + 0.442f, 0.f));
+	winnerBub->addKeyframe(WINNING, glm::vec2(disp + 0.442f, 0.f));
+	winnerBub->addKeyframe(WINNING, glm::vec2(disp + 0.442f, 0.f));
+	winnerBub->addKeyframe(WINNING, glm::vec2(disp + 0.442f, 0.f));
+	winnerBub->addKeyframe(WINNING, glm::vec2(disp + 0.442f, 0.f));
+	winnerBub->addKeyframe(WINNING, glm::vec2(disp + 0.442f, 0.f));
+	winnerBub->addKeyframe(WINNING, glm::vec2(disp + 0.387f, 0.f));
+	winnerBub->addKeyframe(WINNING, glm::vec2(disp + 0.332f, 0.1f));
+	winnerBub->changeAnimation(WINNING);
+	winnerBub->setPosition(glm::vec2(WIN_X, WIN_Y));
 }
 
 

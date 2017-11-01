@@ -144,6 +144,7 @@
     <ClInclude Include="Ball.h" />
     <ClInclude Include="TexturedQuad.h" />
     <ClInclude Include="TileMap.h" />
+    <ClInclude Include="WaitTimer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Explosion.cpp" />
@@ -164,6 +165,7 @@
     <ClCompile Include="Ball.cpp" />
     <ClCompile Include="TexturedQuad.cpp" />
     <ClCompile Include="TileMap.cpp" />
+    <ClCompile Include="WaitTimer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="levels\level01.txt" />

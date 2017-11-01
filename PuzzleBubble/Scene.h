@@ -12,6 +12,7 @@
 #include "Sound.h"
 #include "Explosion.h"
 #include "Glow.h"
+#include "WaitTimer.h"
 
 
 // Scene contains all the entities of our game.
@@ -31,15 +32,15 @@ public:
 
 private:
 	void initShaders();
-	void initHelper();
+	void initAnims();
 	TileMap *map;
 	Player *player;
 	ShaderProgram texProgram, textProgram, ballProgram;
 	float currentTime;
 	int updateScreenTimer;
 	glm::mat4 projection;
-	Sprite *skin, *background, *bub2;
-	Texture skinTex, ballsTex, bgTex, explosionTex, bub2Tex, glowTex;	
+	Sprite *skin, *background, *bub2, *winnerBub;
+	Texture skinTex, ballsTex, bgTex, explosionTex, bub2Tex, glowTex, winTex;	
 	vector<glm::vec2> ballsCoords; //balls tex coords
 	queue<Explosion*> explosions; //explosions go here 
 	Ball *currentBall, *nextBall, *movingBall = NULL;
@@ -52,6 +53,7 @@ private:
 	int exploding; //0 if no balls are exploding, 1..5 if they are, indicating the sprite
 	queue<int> ballsExploding; //x, y and color of the exploding balls while they are still exploding
 	queue<Ball> qBallsExploding; //to enqueue explosions and render them
+	WaitTimer waitTimer;
 };
 
 

@@ -16,7 +16,7 @@ enum moves {
 	STILL, RIGHT, LEFT
 };
 
-void Player::init(const glm::ivec2 &tileMapPos, ShaderProgram &shaderProgram, glm::vec2 position)
+void Player::init(TileMap *map, ShaderProgram &shaderProgram, glm::vec2 position)
 {
 	spritesheet.loadFromFile("images/arrow.png", TEXTURE_PIXEL_FORMAT_RGBA);
 	spritesheet.setWrapS(GL_CLAMP_TO_EDGE);
@@ -27,6 +27,7 @@ void Player::init(const glm::ivec2 &tileMapPos, ShaderProgram &shaderProgram, gl
 	sprite->setSpriteCenter(glm::vec2(PLAYER_CENTER_X, PLAYER_CENTER_Y));
 	sprite->setPosition(glm::vec2(position.x - PLAYER_CENTER_X, position.y - PLAYER_CENTER_Y));
 	this->position = position;
+	this->map = map;
 	arrowDirection = -glm::normalize(glm::rotate(glm::mat4(1.0f), arrowAngle, glm::vec3(0.f, 0.f, 1.f)) * glm::vec4(0.f, 1.f, 0.f, 1.f));
 
 	//bub's sprites
@@ -77,7 +78,7 @@ void Player::update(int deltaTime, Ball *currentBall)
 		arrowAngle -= ROT_SPEED * deltaTime;
 		arrowDirection = -glm::normalize(glm::rotate(glm::mat4(1.0f), arrowAngle, glm::vec3(0.f, 0.f, 1.f)) * glm::vec4(0.f, 1.f, 0.f, 1.f));
 	}
-	else if (Game::instance().getKey(32) && waitingToShoot <= 0 && !blocked) {
+	else if (Game::instance().getKey(32) && waitingToShoot <= 0 && !map->isUpdating()) {
 		waitingToShoot += WAIT_TIME;
 		ballShot = true;
 		currentBall->setDirection(glm::vec2(arrowDirection));
@@ -108,10 +109,6 @@ void Player::setWaitingTime(int time)
 	waitingToShoot = time;
 }
 
-void Player::setBlocked(bool status)
-{
-	this->blocked = status;
-}
 
 void Player::render()
 {
