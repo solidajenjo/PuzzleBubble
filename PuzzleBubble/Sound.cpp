@@ -24,5 +24,5 @@ void Sound::stop()
 
 Sound::~Sound()
 {
-
+	SDL_CloseAudioDevice(deviceId);
 }

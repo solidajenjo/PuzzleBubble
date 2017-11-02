@@ -76,6 +76,7 @@ private:
 	Sprite *press;
 	glm::vec2 posInserted;
 	int colorInserted;
+	int prevMapPos;
 };
 
 

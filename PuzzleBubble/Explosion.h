@@ -15,6 +15,8 @@ private:
 	Texture spritesheet;
 	Sprite *sprite;
 	TileMap *map;
-	int state;	
+	ShaderProgram *shaderProgram;
+	int state;
+	int color;
 };
 

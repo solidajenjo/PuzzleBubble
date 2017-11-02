@@ -83,6 +83,8 @@ Scene::~Scene()
 		delete stageClear;
 	if (scoreSound != NULL)
 		delete scoreSound;
+	if (gameOverSound != NULL)
+		delete gameOverSound;
 }
 
 
@@ -285,7 +287,7 @@ void Scene::update(int deltaTime)
 			movingBall->update(deltaTime, map);
 			if (movingBall->isDelete()) {
 				delete(movingBall);
-				movingBall = NULL;	
+				movingBall = NULL;
 				//post ball insertion effects // avoid overlap effects and screen movement
 				if (map->getBallInserted()) {
 					ballStopingSound->play();
@@ -295,26 +297,26 @@ void Scene::update(int deltaTime)
 						glowing->init(texProgram, map->getPosInserted(), map->getColorInserted());
 					}
 				}
-				if (map->howManyExplosions() > 0) {
-					stillExploding = map->howManyExplosions();
-					queue<int> ballsToExplode = map->getMustExplode(); // format of queue [color -> y -> x] (x first) in screen coords
-					scoreSound->stop();
-					score += (ballsToExplode.size() / 3) * 10;
-					while (!ballsToExplode.empty()) {
-						int x = ballsToExplode.front();
-						ballsToExplode.pop();
-						int y = ballsToExplode.front();
-						ballsToExplode.pop();
-						int color = ballsToExplode.front();
-						ballsToExplode.pop();
-						Explosion *exp = new Explosion();
-						exp->init(texProgram, glm::vec2(x, y), color);
-						explosions.push(exp);
-					}
-					exploding = 1;
-					map->resetMustExplode();
-					scoreSound->play();
+			}
+			if (map->howManyExplosions() > 0) {
+				stillExploding = map->howManyExplosions();
+				queue<int> ballsToExplode = map->getMustExplode(); // format of queue [color -> y -> x] (x first) in screen coords
+				scoreSound->stop();
+				score += (ballsToExplode.size() / 3) * 10;
+				while (!ballsToExplode.empty()) {
+					int x = ballsToExplode.front();
+					ballsToExplode.pop();
+					int y = ballsToExplode.front();
+					ballsToExplode.pop();
+					int color = ballsToExplode.front();
+					ballsToExplode.pop();
+					Explosion *exp = new Explosion();
+					exp->init(texProgram, glm::vec2(x, y), color);
+					explosions.push(exp);
 				}
+				exploding = 1;
+				map->resetMustExplode();
+				scoreSound->play();
 			}
 		}		
 		if (player->isBallShot()) {

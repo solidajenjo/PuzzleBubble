@@ -97,7 +97,8 @@ void Game::setStatus(int status)
 	this->status = status;
 	if (status == 0) {
 		menu.init();
-		delete scene;
+		if (scene != NULL)	delete scene;		
+		scene = NULL;
 	}
 	if (status == 1) {
 		scene = new Scene();

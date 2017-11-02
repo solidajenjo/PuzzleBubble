@@ -262,12 +262,16 @@ void TileMap::checkExplosions(glm::vec2 newBallPos, int color)
 		}
 		this->prepareArrays(minCoordsRedraw, programRedraw);
 	}
+	else if (color == SPECIAL_BALL + 1) {
+		eraseInMap.push(newBallPos.x);
+		eraseInMap.push(newBallPos.y);
+	}
 	else mustExplode = queue<int>();	
 	//check "flying" balls
 	//if not exists a path to the top of the board the ball is "flying"
 	for (int i = 1; i < logicMatrix.size(); ++i) {
 		for (int j = 0; j < logicMatrix[i].size(); ++j) {
-			if (logicMatrix[i][j] != 0) {
+			if (logicMatrix[i][j] != 0 && logicMatrix[i][j] != SPECIAL_BALL) {
 				Q = queue<int>();
 				Q.push(j); Q.push(i);
 				bool hanging = false;
@@ -394,6 +398,12 @@ int TileMap::screenToTileCellContent(glm::vec2 screenPos, bool special)
 		map[mapPos] = 0;
 		prepareArrays(minCoordsRedraw, programRedraw);
 	}
+	/*else if (special && map[mapPos] == 9) {
+		mustExplode.push(mapToLogicMatrix[prevMapPos * 2]);
+		mustExplode.push(mapToLogicMatrix[prevMapPos * 2 + 1]);
+		mustExplode.push(1);	
+	}*/
+	prevMapPos = mapPos;
  	return map[mapPos];
 }
 
@@ -407,13 +417,14 @@ void TileMap::insertBall(glm::vec2 position, int color)
 	int mapPos = yPos * mapSize.x + xPos;
 	
    	if (color != SPECIAL_BALL) map[mapPos] = color + 1;
+
 	ballInserted = true;
 	checkExplosions(glm::vec2(mapToLogicMatrix[mapPos * 2], mapToLogicMatrix[mapPos * 2 + 1]), color + 1);	
 	if (mustExplode.empty()) {
 		posInserted = logicToScreen[mapToLogicMatrix[mapPos * 2 + 1]][mapToLogicMatrix[mapPos * 2]] + glm::vec2(1.f, 1.f);
 		colorInserted = color;
 	}
-	else colorInserted = 7;
+	else colorInserted = SPECIAL_BALL;
 }
 
 glm::vec2 TileMap::getPosInserted() {
