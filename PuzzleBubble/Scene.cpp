@@ -182,6 +182,7 @@ void Scene::update(int deltaTime)
 	skin->setPosition(glm::vec2(16.f, 8.f));
 	background->setPosition(glm::vec2(386.f, 340.f));
 	if (status == DEAD) {
+		screenMovementSound->stop();
 		if (waitTimer.isFinished() && player->anyKeyPressed()) Game::instance().setStatus(0);
 		return;
 	}
