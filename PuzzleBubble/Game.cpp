@@ -22,6 +22,9 @@ bool Game::update(int deltaTime)
 	case 2:
 		instructions.update(deltaTime);
 		break;
+	case 3:
+		credits.update(deltaTime);
+		break;
 	}	
 	
 	return bPlay;
@@ -39,6 +42,9 @@ void Game::render(int deltaTime)
 		break;
 	case 2:
 		instructions.render(deltaTime);
+		break;
+	case 3:
+		credits.render(deltaTime);
 		break;
 	}
 }
@@ -87,6 +93,9 @@ bool Game::getSpecialKey(int key) const
 	return specialKeys[key];
 }
 
+void Game::loadCredits(int deltaTime) {
+	credits.init(deltaTime);
+}
 
 void Game::loadInstructions(int deltaTime) {
 	instructions.init(deltaTime);

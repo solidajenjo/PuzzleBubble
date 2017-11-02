@@ -8,8 +8,8 @@
 #define SCREEN_Y 480
 #define MENU_X 320.f
 #define MENU_Y 240.f
-#define MENU_TEXT_X 300.f
-#define MENU_TEXT_Y 250.f
+#define INST_TEXT_X 320.f
+#define INST_TEXT_Y 240.f
 #define ROTSPEED 0.00002f
 #define MAX_ROT 0.05f
 #define SELECTOR_X 35.f
@@ -45,9 +45,9 @@ void Instructions::init(int deltaTime)
 	instructionsTex.setWrapT(GL_CLAMP_TO_EDGE);
 	instructionsTex.setMinFilter(GL_LINEAR_MIPMAP_LINEAR);
 	instructionsTex.setMagFilter(GL_LINEAR_MIPMAP_LINEAR);
-	instructions = Sprite::createSprite(glm::ivec2(640.f, 512.f), glm::vec2(1, 1), &instructionsTex, &instTexProg);
-	instructions->setSpriteCenter(glm::vec2(320.f, 256.f));
-	instructions->setPosition(glm::vec2(MENU_TEXT_X, MENU_TEXT_Y));
+	instructions = Sprite::createSprite(glm::ivec2(640.f, 480.f), glm::vec2(1, 1), &instructionsTex, &instTexProg);
+	instructions->setSpriteCenter(glm::vec2(320.f, 240.f));
+	instructions->setPosition(glm::vec2(INST_TEXT_X, INST_TEXT_Y));
 
 	instLoop = new Sound("sounds/menuLoop.wav");
 	musicTimer = 0;
