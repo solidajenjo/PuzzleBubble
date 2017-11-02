@@ -72,6 +72,9 @@
     <ClInclude Include="WaitTimer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Credits.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Game.cpp">
@@ -129,6 +132,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="WaitTimer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Credits.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
