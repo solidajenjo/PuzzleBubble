@@ -43,6 +43,7 @@ public:
 	bool getBallInserted();
 	bool isUpdating();
 	void setIsUpdating(bool updating);
+	void setDead();
 	void initPress();
 	glm::vec2 getPosInserted();
 	int getColorInserted();

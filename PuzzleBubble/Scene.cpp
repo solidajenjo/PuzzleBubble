@@ -278,6 +278,7 @@ void Scene::update(int deltaTime)
 		musicTimer -= deltaTime;
 		if (map->checkDeath()) {
 			status = DEAD;
+			map->setDead();
 			delete(movingBall);
 			movingBall = NULL;
 			gameLoop->stop();
@@ -373,7 +374,6 @@ void Scene::render(int deltaTime)
 	}
 	else if(status == DEAD) {		
 		texProgram.setUniform4f("color", 0.2f, 0.2f, 0.2f, 1.0f);
-		map = TileMap::createTileMap("levels/dead.txt", glm::vec2(SCREEN_X, SCREEN_Y), texProgram);
 	}
 	else if (status == STAGE_CLEAR) {		
 		texProgram.setUniform4f("color", 0.6f, 0.6f, 0.6f, 1.0f);
@@ -407,14 +407,6 @@ void Scene::render(int deltaTime)
 	}
 	else if (status == DEAD) {
 		ballProgram.setUniform4f("color", 0.2f, 0.2f, 0.2f, 1.0f);
-		/*
-		glm::vec2 geom[2] = { glm::vec2(0.f, 0.f), glm::vec2(16.f, 16.f) };
-		glm::vec2 texCoords[2];
-		texCoords[0] = ballsCoords[7 * 2]; texCoords[1] = ballsCoords[(7 * 2) + 1];
-		Ball *dead = Ball::createBall(geom, texCoords, ballProgram);
-		dead->setColor(7);
-		dead->setPosition(map->getScreenCoords(6, 6));
-		dead->render(glm::vec2(BALL_SCALE_X, BALL_SCALE_Y), ballsTex);*/
 	}
 	else if (status == STAGE_CLEAR) {
 		ballProgram.setUniform4f("color", 0.6f, 0.6f, 0.6f, 1.0f);

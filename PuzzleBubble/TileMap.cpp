@@ -363,7 +363,13 @@ bool TileMap::isUpdating()
 {
 	return updating;
 }
-
+
+void TileMap::setDead()
+{
+	int k = mapSize.x * mapSize.y;
+	for (int i = 0; i < k; i++) if (map[i] != 0) map[i] = 7;
+	prepareArrays(minCoordsRedraw, programRedraw);
+}
 void TileMap::setIsUpdating(bool updating)
 {
 	this->updating = updating;
