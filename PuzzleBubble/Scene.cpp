@@ -175,7 +175,7 @@ void Scene::init()
 	exploding = 0;
 	glowing = NULL;
 	initAnims();
-	framesBub2Anim = 0;
+	framesBub2Anim = 0;	
 }
 
 void Scene::update(int deltaTime)
@@ -203,6 +203,17 @@ void Scene::update(int deltaTime)
 			explosions.pop();
 			exp->update(deltaTime);
 			explosions.push(exp);
+		}
+	}
+	if (squids.size() > 0) {
+		int s = squids.size();
+		for (int i = 0; i < s; ++i) {
+			Squid *sq = squids.front();
+			squids.pop();
+			if (!sq->isOut()) {
+				sq->update(deltaTime);
+				squids.push(sq);
+			}
 		}
 	}
 	switch (status) {
@@ -313,6 +324,10 @@ void Scene::update(int deltaTime)
 					Explosion *exp = new Explosion();
 					exp->init(texProgram, glm::vec2(x, y), color);
 					explosions.push(exp);
+
+					Squid *sq = new Squid();
+					sq->init(squidProgram, glm::vec2(x, y));
+					squids.push(sq);
 				}
 				exploding = 1;
 				map->resetMustExplode();
@@ -418,6 +433,7 @@ void Scene::render(int deltaTime)
 		}
 
 	}
+		
 	
 	if (movingBall != NULL) {
 		movingBall->render(glm::vec2(BALL_SCALE_X, BALL_SCALE_Y), ballsTex);
@@ -448,6 +464,19 @@ void Scene::render(int deltaTime)
 		text.render("YOU WIN!!!", glm::vec2(246, 214), 20, glm::vec4(0.02f, 0.96f, 0.15f, 1.f));
 		if (waitTimer.isFinished())
 			text.render("Press any key to continue.", glm::vec2(130, 324), 20, glm::vec4(0.02f, 0.96f, 0.15f, 1.f));
+	}
+	squidProgram.use();
+	squidProgram.setUniformMatrix4f("projection", projection);
+	if (status == DEAD) squidProgram.setUniform4f("color", 0.2f, 0.2f, 0.2f, 1.0f);
+	else squidProgram.setUniform4f("color", 1.0f, 1.0f, 1.0f, 1.0f);
+	if (squids.size() > 0) {
+		int s = squids.size();
+		for (int i = 0; i < s; ++i) {
+			Squid *sq = squids.front();
+			squids.pop();
+			sq->render();
+			squids.push(sq);
+		}
 	}
 }
 
@@ -501,6 +530,16 @@ void Scene::initShaders()
 	}
 	ballProgram.bindFragmentOutput("outColor");
 
+	squidProgram.init();
+	squidProgram.addShader(vShader);
+	squidProgram.addShader(fShader);
+	squidProgram.link();
+	if (!squidProgram.isLinked())
+	{
+		cout << "Shader Linking Error" << endl;
+		cout << "" << squidProgram.log() << endl << endl;
+	}
+	squidProgram.bindFragmentOutput("outColor");
 
 	vShader.free();
 	fShader.free();

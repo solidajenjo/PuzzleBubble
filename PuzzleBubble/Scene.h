@@ -13,6 +13,7 @@
 #include "Explosion.h"
 #include "Glow.h"
 #include "WaitTimer.h"
+#include "Squid.h"
 
 
 // Scene contains all the entities of our game.
@@ -35,7 +36,7 @@ private:
 	void initAnims();
 	TileMap *map;
 	Player *player;
-	ShaderProgram texProgram, textProgram, ballProgram;
+	ShaderProgram texProgram, textProgram, ballProgram, squidProgram;
 	float currentTime;
 	int updateScreenTimer;
 	glm::mat4 projection;
@@ -43,6 +44,7 @@ private:
 	Texture skinTex, ballsTex, bgTex, explosionTex, bub2Tex, glowTex, winTex;	
 	vector<glm::vec2> ballsCoords; //balls tex coords
 	queue<Explosion*> explosions; //explosions go here 
+	queue<Squid*> squids;
 	Ball *currentBall, *nextBall, *movingBall = NULL;
 	int status, score, frameCounter, musicTimer, specialBallDogWatch, stillExploding;
 	Glow *glowing;
