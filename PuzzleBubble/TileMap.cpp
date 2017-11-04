@@ -334,6 +334,10 @@ queue<int> TileMap::getMustExplode()
 	return mustExplodeInScreenCoords;
 }
 
+glm::vec2 TileMap::getScreenCoords(int x, int y) {
+	return logicToScreen[y][x];
+}
+
 int TileMap::howManyExplosions()
 {
 	return mustExplode.size();
@@ -460,36 +464,3 @@ bool TileMap::checkDeath()
 	for (int i = 0; i < mapSize.x; ++i) c += map[DEATH_LINE * mapSize.x + i];
 	return (c != 0);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

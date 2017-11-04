@@ -358,6 +358,7 @@ void Scene::render(int deltaTime)
 	}
 	else if(status == DEAD) {		
 		texProgram.setUniform4f("color", 0.2f, 0.2f, 0.2f, 1.0f);
+		map = TileMap::createTileMap("levels/dead.txt", glm::vec2(SCREEN_X, SCREEN_Y), texProgram);
 	}
 	else if (status == STAGE_CLEAR) {		
 		texProgram.setUniform4f("color", 0.6f, 0.6f, 0.6f, 1.0f);
@@ -369,7 +370,7 @@ void Scene::render(int deltaTime)
 	glm::mat4 modelview = glm::mat4(1.0f);
 	texProgram.setUniformMatrix4f("modelview", modelview);
 	texProgram.setUniform2f("texCoordDispl", 0.f, 0.f);
-	
+
 	map->render();
 	skin->render();
 	player->render();	
@@ -391,6 +392,14 @@ void Scene::render(int deltaTime)
 	}
 	else if (status == DEAD) {
 		ballProgram.setUniform4f("color", 0.2f, 0.2f, 0.2f, 1.0f);
+		/*
+		glm::vec2 geom[2] = { glm::vec2(0.f, 0.f), glm::vec2(16.f, 16.f) };
+		glm::vec2 texCoords[2];
+		texCoords[0] = ballsCoords[7 * 2]; texCoords[1] = ballsCoords[(7 * 2) + 1];
+		Ball *dead = Ball::createBall(geom, texCoords, ballProgram);
+		dead->setColor(7);
+		dead->setPosition(map->getScreenCoords(6, 6));
+		dead->render(glm::vec2(BALL_SCALE_X, BALL_SCALE_Y), ballsTex);*/
 	}
 	else if (status == STAGE_CLEAR) {
 		ballProgram.setUniform4f("color", 0.6f, 0.6f, 0.6f, 1.0f);
@@ -435,6 +444,7 @@ void Scene::render(int deltaTime)
 	text.render("LEVEL "+to_string(level)+"             SCORE = " + to_string(score), glm::vec2(210, 24), 12, glm::vec4(0.02f, 0.96f, 0.15f, 1.f));
 	if (status == DEAD && (frameCounter % 100) < 80) {
 		text.render("GAME OVER", glm::vec2(50, 224), 80, glm::vec4(0.02f, 0.96f, 0.15f, 1.f));
+
 		if (waitTimer.isFinished())
 			text.render("Press any key to continue.", glm::vec2(130, 324), 20, glm::vec4(0.02f, 0.96f, 0.15f, 1.f));
 	}	

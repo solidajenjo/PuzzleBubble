@@ -46,6 +46,7 @@ public:
 	void initPress();
 	glm::vec2 getPosInserted();
 	int getColorInserted();
+	glm::vec2 getScreenCoords(int x, int y);
 private:
 	bool loadLevel(const string &levelFile);
 	void prepareArrays(const glm::vec2 &minCoords, ShaderProgram &program);
