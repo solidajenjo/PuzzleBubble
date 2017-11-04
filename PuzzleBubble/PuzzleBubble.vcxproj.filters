@@ -75,6 +75,9 @@
     <ClInclude Include="Credits.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Squid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Game.cpp">
@@ -135,6 +138,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Credits.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Squid.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

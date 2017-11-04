@@ -63,7 +63,6 @@ bool Text::init(const char *filename)
 	glm::vec2 texCoords[2] = {glm::vec2(0.0f, 0.0f), glm::vec2(1.0f, 1.0f)};
 	
 	quad = TexturedQuad::createTexturedQuad(geom, texCoords, program);
-	
 	return true;
 }
 
