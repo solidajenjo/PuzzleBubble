@@ -78,7 +78,7 @@ void Player::update(int deltaTime, Ball *currentBall)
 		arrowAngle -= ROT_SPEED * deltaTime;
 		arrowDirection = -glm::normalize(glm::rotate(glm::mat4(1.0f), arrowAngle, glm::vec3(0.f, 0.f, 1.f)) * glm::vec4(0.f, 1.f, 0.f, 1.f));
 	}
-	else if (Game::instance().getKey(32) && waitingToShoot <= 0 && !map->isUpdating()) {
+	else if (currentBall != NULL && Game::instance().getKey(32) && waitingToShoot <= 0 && !map->isUpdating()) {
 		waitingToShoot += WAIT_TIME;
 		ballShot = true;
 		currentBall->setDirection(glm::vec2(arrowDirection));

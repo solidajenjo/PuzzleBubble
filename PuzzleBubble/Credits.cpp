@@ -69,7 +69,7 @@ void Credits::update(int deltaTime)
 		credLoop->stop();
 		delete credBackground;
 		delete credits;
-		//Game::instance().loadGame();
+		delete credLoop;
 		Game::instance().setStatus(0);
 	}
 }

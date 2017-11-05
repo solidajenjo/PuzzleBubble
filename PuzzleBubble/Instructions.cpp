@@ -69,7 +69,7 @@ void Instructions::update(int deltaTime)
 		instLoop->stop();
 		delete instBackground;
 		delete instructions;
-		//Game::instance().loadGame();
+		delete instLoop;
 		Game::instance().setStatus(0);
 	}
 }

@@ -81,7 +81,8 @@ void Menu::update(int deltaTime)
 		menuLoop->stop();		
 		delete menuSelector;
 		delete menuBackground;
-		delete menuText;		
+		delete menuText;	
+		delete menuLoop;
 		Game::instance().setStatus(1);
 	}
 	if (Game::instance().getKey(13) && menuPos == 1) {
@@ -89,6 +90,7 @@ void Menu::update(int deltaTime)
 		delete menuSelector;
 		delete menuBackground;
 		delete menuText;
+		delete menuLoop;
 		Game::instance().loadInstructions(deltaTime);
 		Game::instance().setStatus(2);
 	}
@@ -97,6 +99,7 @@ void Menu::update(int deltaTime)
 		delete menuSelector;
 		delete menuBackground;
 		delete menuText;
+		delete menuLoop;
 		Game::instance().loadCredits(deltaTime);
 		Game::instance().setStatus(3);
 	}

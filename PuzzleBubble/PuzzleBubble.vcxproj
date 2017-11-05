@@ -104,6 +104,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>C:\Users\derek\Desktop\PuzzleBubble\PuzzleBubble\PuzzleBubble\dependencies\freetype-2.3.5-1-bin\include\freetype2;C:\Users\derek\Desktop\PuzzleBubble\PuzzleBubble\PuzzleBubble\dependencies\freetype-2.3.5-1-bin\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

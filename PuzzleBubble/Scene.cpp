@@ -282,6 +282,8 @@ void Scene::update(int deltaTime)
 			delete(movingBall);
 			movingBall = NULL;
 			gameLoop->stop();
+			screenMovementSound->stop();
+			screenSoundPlaying = false;
 			gameOverSound->play();
 			waitTimer = WaitTimer(WAITING_TIME);
 			return;
@@ -352,6 +354,7 @@ void Scene::update(int deltaTime)
 			status = STAGE_CLEAR;
 			waitTimer = WaitTimer(WAITING_TIME);
 			gameLoop->stop();
+			
 			stageClear->play();
 			updateScreenTimer = UPDATE_TIME / 20;
 		}
