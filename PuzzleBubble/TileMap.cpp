@@ -363,7 +363,8 @@ bool TileMap::isUpdating()
 {
 	return updating;
 }
-
+
+
 void TileMap::setDead()
 {
 	int k = mapSize.x * mapSize.y;

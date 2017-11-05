@@ -455,6 +455,8 @@ void Scene::render(int deltaTime)
 	text.render("LEVEL "+to_string(level)+"             SCORE = " + to_string(score), glm::vec2(210, 24), 12, glm::vec4(0.02f, 0.96f, 0.15f, 1.f));
 	if (status == DEAD && (frameCounter % 100) < 80) {
 		text.render("GAME OVER", glm::vec2(50, 224), 80, glm::vec4(0.02f, 0.96f, 0.15f, 1.f));
+		text.render("Congratulations!", glm::vec2(140, 254), 30, glm::vec4(0.02f, 0.96f, 0.15f, 1.f));
+		text.render("You got " + to_string(score) + " points!", glm::vec2(132, 284), 30, glm::vec4(0.02f, 0.96f, 0.15f, 1.f));
 
 		if (waitTimer.isFinished())
 			text.render("Press any key to continue.", glm::vec2(130, 324), 20, glm::vec4(0.02f, 0.96f, 0.15f, 1.f));
